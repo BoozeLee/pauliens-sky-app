@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart';
+import 'screens/splash_screen.dart';
 import 'theme/cosmic_theme.dart';
 
 class PauliensApp extends StatelessWidget {
@@ -11,7 +11,16 @@ class PauliensApp extends StatelessWidget {
       title: "Paulien's Sky",
       theme: CosmicTheme.dark,
       debugShowCheckedModeBanner: false,
-      home: const HomeScreen(),
+      // Constrain to phone-width on desktop so the mobile UI looks correct
+      builder: (context, child) {
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: child!,
+          ),
+        );
+      },
+      home: const SplashScreen(),
     );
   }
 }
