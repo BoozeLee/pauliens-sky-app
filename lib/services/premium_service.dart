@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'ai_service.dart';
 
@@ -111,6 +112,40 @@ class PremiumService {
   String get _todayString {
     final now = DateTime.now();
     return '${now.year}-${now.month}-${now.day}';
+  }
+
+  // ── Daily reading cache ───────────────────────────────────────────────────
+
+  static const _dailyReadingKey  = 'daily_reading_text';
+  static const _dailyReadingDate = 'daily_reading_date';
+  static const _readingHistKey   = 'daily_reading_history'; // JSON list
+
+  String? getCachedDailyReading() {
+    final today = _todayString;
+    if (_prefs.getString(_dailyReadingDate) != today) return null;
+    return _prefs.getString(_dailyReadingKey);
+  }
+
+  Future<void> cacheDailyReading(String text) async {
+    final today = _todayString;
+    await _prefs.setString(_dailyReadingDate, today);
+    await _prefs.setString(_dailyReadingKey, text);
+
+    // Append to history (last 7 entries)
+    final raw = _prefs.getString(_readingHistKey);
+    final history = raw != null
+        ? List<Map<String, dynamic>>.from(jsonDecode(raw) as List)
+        : <Map<String, dynamic>>[];
+    history.removeWhere((e) => e['date'] == today);
+    history.insert(0, {'date': today, 'text': text});
+    if (history.length > 7) history.removeLast();
+    await _prefs.setString(_readingHistKey, jsonEncode(history));
+  }
+
+  List<Map<String, dynamic>> getDailyReadingHistory() {
+    final raw = _prefs.getString(_readingHistKey);
+    if (raw == null) return [];
+    return List<Map<String, dynamic>>.from(jsonDecode(raw) as List);
   }
 
   // ── Free tier feature list ────────────────────────────────────────────────

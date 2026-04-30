@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../models/birth_context.dart';
 import '../models/culture_chart.dart';
 import '../services/chart_engine.dart';
 import '../theme/cosmic_theme.dart';
+import '../services/fixed_stars.dart';
 import '../widgets/culture_card.dart';
+import '../widgets/fixed_stars_card.dart';
 import '../widgets/sky_background.dart';
 import '../widgets/zodiac_wheel.dart';
 import 'personality_screen.dart';
 
 class ChartScreen extends StatefulWidget {
   final BirthContext birthContext;
-  const ChartScreen({super.key, required this.birthContext});
+  final int initialTab;
+  const ChartScreen({super.key, required this.birthContext, this.initialTab = 0});
 
   @override
   State<ChartScreen> createState() => _ChartScreenState();
@@ -35,8 +39,14 @@ class _ChartScreenState extends State<ChartScreen>
   void initState() {
     super.initState();
     _chart = ChartEngine().compute(widget.birthContext);
-    _tabController = TabController(length: _tabs.length, vsync: this);
+    _tabController = TabController(
+        length: _tabs.length,
+        vsync: this,
+        initialIndex: widget.initialTab.clamp(0, _tabs.length - 1));
     _tabController.addListener(() {
+      if (_tabController.indexIsChanging) {
+        HapticFeedback.selectionClick();
+      }
       setState(() => _selectedCultureIndex = _tabController.index);
     });
   }
@@ -95,15 +105,18 @@ class _ChartScreenState extends State<ChartScreen>
             body: TabBarView(
               controller: _tabController,
               children: _tabs.map((id) {
-                final cultureChart =
-                    _chart.chart(id);
+                final cultureChart = _chart.chart(id);
                 if (cultureChart == null) {
                   return const Center(
                       child: Text('No data',
-                          style:
-                              TextStyle(color: CosmicColors.textMuted)));
+                          style: TextStyle(color: CosmicColors.textMuted)));
                 }
-                return _CultureDetailView(chart: cultureChart);
+                return _CultureDetailView(
+                  chart: cultureChart,
+                  prominentStars: id == CultureId.western
+                      ? _chart.prominentStars
+                      : const [],
+                );
               }).toList(),
             ),
           ),
@@ -160,7 +173,9 @@ class _WheelHeader extends StatelessWidget {
 
 class _CultureDetailView extends StatelessWidget {
   final CultureChart chart;
-  const _CultureDetailView({required this.chart});
+  final List<(FixedStar, double)> prominentStars;
+  const _CultureDetailView(
+      {required this.chart, this.prominentStars = const []});
 
   @override
   Widget build(BuildContext context) {
@@ -170,8 +185,14 @@ class _CultureDetailView extends StatelessWidget {
         CultureCard(chart: chart, expanded: true),
         if (chart.keyInsights.isNotEmpty) ...[
           const SizedBox(height: 16),
-          _InsightsBlock(insights: chart.keyInsights, accent: chart.id.accentColor),
+          _InsightsBlock(
+              insights: chart.keyInsights, accent: chart.id.accentColor),
         ],
+        if (prominentStars.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          FixedStarsCard(stars: prominentStars),
+        ],
+        const SizedBox(height: 24),
       ],
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'services/locale_service.dart';
 import 'services/premium_service.dart';
 import 'state/app_state.dart';
 import 'app.dart';
@@ -9,6 +10,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await PremiumService.init();
+  await LocaleService.init();
 
   final appState = AppState();
   await appState.init();

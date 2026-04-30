@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/birth_context.dart';
 import '../models/profile.dart';
+import '../services/locale_service.dart';
 import '../services/premium_service.dart';
 import '../state/app_state.dart';
 import '../theme/cosmic_theme.dart';
 import '../widgets/sky_background.dart';
+import 'upgrade_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -216,6 +218,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _SectionTitle('SUBSCRIPTION'),
                     const SizedBox(height: 12),
                     _subscriptionCard(context, premium),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.stars_rounded,
+                            color: CosmicColors.neonLavender, size: 16),
+                        label: const Text('Upgrade to Premium',
+                            style: TextStyle(color: CosmicColors.neonLavender)),
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                              builder: (_) => const UpgradeScreen()),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                              color: CosmicColors.neonLavender
+                                  .withValues(alpha: 0.5)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    _SectionTitle('LANGUAGE / TAAL'),
+                    const SizedBox(height: 12),
+                    _LocaleToggle(),
                     const SizedBox(height: 32),
 
                     SizedBox(
@@ -480,4 +506,85 @@ class _SectionTitle extends StatelessWidget {
     style: Theme.of(context).textTheme.labelSmall?.copyWith(
         color: CosmicColors.neonLavender, letterSpacing: 2, fontSize: 11),
   );
+}
+
+class _LocaleToggle extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final loc = context.watch<LocaleService>();
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: CosmicColors.card,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: CosmicColors.divider),
+      ),
+      child: Row(
+        children: [
+          _LocaleOption(
+            label: 'English',
+            flag: '🇬🇧',
+            selected: loc.locale == AppLocale.en,
+            onTap: () => loc.setLocale(AppLocale.en),
+          ),
+          _LocaleOption(
+            label: 'Nederlands',
+            flag: '🇳🇱',
+            selected: loc.locale == AppLocale.nl,
+            onTap: () => loc.setLocale(AppLocale.nl),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LocaleOption extends StatelessWidget {
+  final String label, flag;
+  final bool selected;
+  final VoidCallback onTap;
+  const _LocaleOption(
+      {required this.label,
+      required this.flag,
+      required this.selected,
+      required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: selected
+                ? CosmicColors.neonLavender.withValues(alpha: 0.15)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            border: selected
+                ? Border.all(
+                    color: CosmicColors.neonLavender.withValues(alpha: 0.5))
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(flag, style: const TextStyle(fontSize: 16)),
+              const SizedBox(width: 6),
+              Text(label,
+                  style: TextStyle(
+                      color: selected
+                          ? CosmicColors.neonLavender
+                          : CosmicColors.textMuted,
+                      fontSize: 13,
+                      fontWeight: selected
+                          ? FontWeight.w600
+                          : FontWeight.normal)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

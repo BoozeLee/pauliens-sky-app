@@ -1,0 +1,39 @@
+name: pauliens-sky
+base: core22
+version: '1.0.0'
+summary: Cultural astrology engine — one birth sky, six traditions
+description: |
+  Paulien's Sky reads your birth sky through six living traditions:
+  Western, Vedic, Chinese, Mayan, Egyptian and Celtic astrology.
+  Powered by real VSOP87 ephemeris data and Claude / Gemini AI.
+
+grade: stable
+confinement: strict
+
+architectures:
+  - build-on: amd64
+
+parts:
+  pauliens-sky:
+    plugin: flutter
+    source: .
+    flutter-target: lib/main.dart
+    build-environment:
+      - FLUTTER_VERSION: stable
+
+apps:
+  pauliens-sky:
+    command: pauliens_sky
+    desktop: usr/share/applications/pauliens-sky.desktop
+    extensions: [gnome]
+    plugs:
+      - network
+      - home
+      - opengl
+      - x11
+      - wayland
+      - desktop
+      - desktop-legacy
+      - gsettings
+    environment:
+      FLUTTER_ENGINE_SWITCH_ENABLE_SOFTWARE_RENDERING: "1"

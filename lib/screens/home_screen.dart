@@ -1,31 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/culture_chart.dart';
 import '../models/profile.dart';
 import '../services/chart_engine.dart';
+import '../state/app_state.dart';
 import '../theme/cosmic_theme.dart';
+import '../widgets/daily_reading_card.dart';
 import '../widgets/sky_background.dart';
 import 'birth_input_screen.dart';
 import 'chart_screen.dart';
 import 'personality_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  late FullChart _paulienChart;
-
-  @override
-  void initState() {
-    super.initState();
-    _paulienChart = ChartEngine().compute(Profile.paulien.birthContext);
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final appState = context.watch<AppState>();
+    final chart = appState.chart;
+
     return Scaffold(
       body: SkyBackground(
         child: SafeArea(
@@ -33,21 +26,27 @@ class _HomeScreenState extends State<HomeScreen> {
             slivers: [
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                sliver: SliverToBoxAdapter(child: _Header()),
+                sliver: SliverToBoxAdapter(
+                  child: _Header(appState: appState),
+                ),
               ),
               SliverPadding(
                 padding: const EdgeInsets.all(20),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
-                    _PaulienCard(chart: _paulienChart),
-                    const SizedBox(height: 24),
+                    if (chart != null) ...[
+                      _ProfileCard(appState: appState, chart: chart),
+                      const SizedBox(height: 20),
+                      DailyReadingCard(chart: chart),
+                      const SizedBox(height: 24),
+                    ],
                     _SectionLabel('READ A NEW SKY'),
                     const SizedBox(height: 12),
-                    _NewReadingButton(),
+                    const _NewReadingButton(),
                     const SizedBox(height: 24),
                     _SectionLabel('TRADITIONS'),
                     const SizedBox(height: 12),
-                    _TraditionsGrid(),
+                    _TraditionsGrid(chart: chart),
                     const SizedBox(height: 32),
                   ]),
                 ),
@@ -60,29 +59,105 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+// ── Header ─────────────────────────────────────────────────────────────────
+
 class _Header extends StatelessWidget {
+  final AppState appState;
+  const _Header({required this.appState});
+
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "Paulien's Sky",
-          style: Theme.of(context).textTheme.displayLarge,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Paulien's Sky",
+                style: Theme.of(context).textTheme.displayLarge,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'One sky. Many traditions.',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+          ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          'One sky. Many traditions.',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
+        // Profile switcher if premium + multiple profiles
+        if (appState.profiles.length > 1)
+          _ProfileSwitcher(appState: appState),
       ],
     );
   }
 }
 
-class _PaulienCard extends StatelessWidget {
+class _ProfileSwitcher extends StatelessWidget {
+  final AppState appState;
+  const _ProfileSwitcher({required this.appState});
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      color: CosmicColors.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      onSelected: (id) => appState.switchProfile(id),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: CosmicColors.neonLavender.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+              color: CosmicColors.neonLavender.withValues(alpha: 0.35)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.person_outline,
+                color: CosmicColors.neonLavender, size: 16),
+            const SizedBox(width: 4),
+            Text(
+              appState.activeProfile.name,
+              style: const TextStyle(
+                  color: CosmicColors.neonLavender, fontSize: 12),
+            ),
+            const Icon(Icons.arrow_drop_down,
+                color: CosmicColors.neonLavender, size: 16),
+          ],
+        ),
+      ),
+      itemBuilder: (_) => appState.profiles
+          .map((p) => PopupMenuItem<String>(
+                value: p.id,
+                child: Row(
+                  children: [
+                    Icon(
+                      p.id == appState.activeProfile.id
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_unchecked,
+                      color: CosmicColors.neonLavender,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(p.name,
+                        style: const TextStyle(
+                            color: CosmicColors.textPrimary, fontSize: 13)),
+                  ],
+                ),
+              ))
+          .toList(),
+    );
+  }
+}
+
+// ── Profile card ───────────────────────────────────────────────────────────
+
+class _ProfileCard extends StatelessWidget {
+  final AppState appState;
   final FullChart chart;
-  const _PaulienCard({required this.chart});
+  const _ProfileCard({required this.appState, required this.chart});
 
   @override
   Widget build(BuildContext context) {
@@ -90,9 +165,9 @@ class _PaulienCard extends StatelessWidget {
     final chinese = chart.charts
         .where((c) => c.id == CultureId.chinese)
         .firstOrNull;
-    final mayan = chart.charts
-        .where((c) => c.id == CultureId.mayan)
-        .firstOrNull;
+    final mayan =
+        chart.charts.where((c) => c.id == CultureId.mayan).firstOrNull;
+    final profile = appState.activeProfile;
 
     return GestureDetector(
       onTap: () => Navigator.of(context).push(MaterialPageRoute(
@@ -111,7 +186,8 @@ class _PaulienCard extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-              color: CosmicColors.neonLavender.withValues(alpha: 0.5), width: 1),
+              color: CosmicColors.neonLavender.withValues(alpha: 0.5),
+              width: 1),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,17 +195,24 @@ class _PaulienCard extends StatelessWidget {
             Row(
               children: [
                 Text('✦ ',
-                    style: TextStyle(
+                    style: const TextStyle(
                         color: CosmicColors.neonLavender, fontSize: 16)),
-                Text(
-                  'Paulien  •  13 March 1996',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      color: CosmicColors.neonLavender, fontSize: 16),
+                Expanded(
+                  child: Text(
+                    '${profile.name}  •  '
+                    '${chart.context.utcTime.day} '
+                    '${_monthName(chart.context.utcTime.month)} '
+                    '${chart.context.utcTime.year}',
+                    style:
+                        Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            color: CosmicColors.neonLavender, fontSize: 15),
+                  ),
                 ),
-                const Spacer(),
                 TextButton(
-                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => PersonalityScreen(chart: chart))),
+                  onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (_) =>
+                              PersonalityScreen(chart: chart))),
                   child: const Text('Profile →',
                       style: TextStyle(
                           color: CosmicColors.neonCyan, fontSize: 12)),
@@ -141,11 +224,13 @@ class _PaulienCard extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _SignBadge('☉ Pisces', CosmicColors.neonCyan),
+                _SignBadge('☉ ${western.sunSign ?? 'Pisces'}',
+                    CosmicColors.neonCyan),
                 _SignBadge(
-                    '☽ ${western.moonSign ?? ''}', CosmicColors.textSecondary),
+                    '☽ ${western.moonSign ?? ''}',
+                    CosmicColors.textSecondary),
                 _SignBadge(
-                    '龍 ${chinese?.sunSign ?? 'Fire Rat'}',
+                    '龍 ${chinese?.sunSign ?? 'Wood Rat'}',
                     CosmicColors.neonPink),
                 _SignBadge(
                     '☀ ${mayan?.sunSign ?? 'Ben'}',
@@ -162,7 +247,10 @@ class _PaulienCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               chart.personality.summary.split('.').first + '.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.6),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(height: 1.6),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
@@ -171,6 +259,11 @@ class _PaulienCard extends StatelessWidget {
       ),
     );
   }
+
+  String _monthName(int m) => const [
+        '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      ][m];
 }
 
 class _SignBadge extends StatelessWidget {
@@ -188,12 +281,17 @@ class _SignBadge extends StatelessWidget {
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Text(text,
-          style: TextStyle(color: color, fontSize: 12, letterSpacing: 0.3)),
+          style:
+              TextStyle(color: color, fontSize: 12, letterSpacing: 0.3)),
     );
   }
 }
 
+// ── New reading button ─────────────────────────────────────────────────────
+
 class _NewReadingButton extends StatelessWidget {
+  const _NewReadingButton();
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -216,7 +314,8 @@ class _NewReadingButton extends StatelessWidget {
                 border: Border.all(
                     color: CosmicColors.neonCyan.withValues(alpha: 0.4)),
               ),
-              child: const Icon(Icons.add, color: CosmicColors.neonCyan, size: 20),
+              child: const Icon(Icons.add,
+                  color: CosmicColors.neonCyan, size: 20),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -243,14 +342,19 @@ class _NewReadingButton extends StatelessWidget {
   }
 }
 
+// ── Traditions grid ────────────────────────────────────────────────────────
+
 class _TraditionsGrid extends StatelessWidget {
+  final FullChart? chart;
+  const _TraditionsGrid({this.chart});
+
   static const _traditions = [
-    ('Western', '♈', CosmicColors.western, 'Tropical zodiac, houses, planets'),
-    ('Chinese', '龍', CosmicColors.chinese, 'Ba Zi, animals, five elements'),
-    ('Vedic', '🕉', CosmicColors.vedic, 'Sidereal, nakshatras, Jyotish'),
-    ('Mayan', '☀', CosmicColors.mayan, 'Tzolk\'in, day signs, tones'),
-    ('Egyptian', '𓂀', CosmicColors.egyptian, '36 decans, deity rulers'),
-    ('Celtic', '🌿', CosmicColors.celtic, 'Tree calendar, ogham, animals'),
+    ('Western', '♈', CosmicColors.western, 'Tropical zodiac, houses, planets', 0),
+    ('Chinese', '龍', CosmicColors.chinese, 'Ba Zi, animals, five elements', 2),
+    ('Vedic', '🕉', CosmicColors.vedic, 'Sidereal, nakshatras, Jyotish', 1),
+    ('Mayan', '☀', CosmicColors.mayan, 'Tzolk\'in, day signs, tones', 3),
+    ('Egyptian', '𓂀', CosmicColors.egyptian, '36 decans, deity rulers', 4),
+    ('Celtic', '🌿', CosmicColors.celtic, 'Tree calendar, ogham, animals', 5),
   ];
 
   @override
@@ -266,41 +370,42 @@ class _TraditionsGrid extends StatelessWidget {
       ),
       itemCount: _traditions.length,
       itemBuilder: (ctx, i) {
-        final (name, emoji, color, desc) = _traditions[i];
+        final (name, emoji, color, desc, tabIndex) = _traditions[i];
         return GestureDetector(
-          onTap: () => Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => ChartScreen(
-              birthContext:
-                  ChartEngine().compute(Profile.paulien.birthContext).context,
-            ),
-          )),
+          onTap: () {
+            final bc = chart?.context ?? Profile.paulien.birthContext;
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (_) =>
+                  ChartScreen(birthContext: bc, initialTab: tabIndex),
+            ));
+          },
           child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: CosmicColors.card,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: color.withValues(alpha: 0.3)),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: CosmicColors.card,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: color.withValues(alpha: 0.3)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(emoji, style: const TextStyle(fontSize: 20)),
+                const Spacer(),
+                Text(name,
+                    style: TextStyle(
+                        color: color,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5)),
+                const SizedBox(height: 2),
+                Text(desc,
+                    style: const TextStyle(
+                        color: CosmicColors.textMuted, fontSize: 10),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis),
+              ],
+            ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(emoji, style: const TextStyle(fontSize: 20)),
-              const Spacer(),
-              Text(name,
-                  style: TextStyle(
-                      color: color,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5)),
-              const SizedBox(height: 2),
-              Text(desc,
-                  style: const TextStyle(
-                      color: CosmicColors.textMuted, fontSize: 10),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis),
-            ],
-          ),
-        ),
         );
       },
     );

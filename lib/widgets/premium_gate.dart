@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../screens/settings_screen.dart';
+import '../screens/upgrade_screen.dart';
 import '../services/premium_service.dart';
 import '../theme/cosmic_theme.dart';
 
@@ -124,20 +126,25 @@ class _UpgradeSheet extends StatelessWidget {
             child: ElevatedButton(
               onPressed: () {
                 Navigator.pop(context);
-                // Navigate to settings
-                // TODO: push settings route
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => const UpgradeScreen(),
+                ));
               },
-              child: const Text('ADD API KEY — UNLOCK FREE'),
+              child: const Text('UPGRADE TO PREMIUM'),
             ),
           ),
-          const SizedBox(height: 10),
-          Text(
-            'Bring your own Anthropic or Gemini key for unlimited access.',
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(fontSize: 11),
-            textAlign: TextAlign.center,
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => const SettingsScreen(),
+                ));
+              },
+              child: const Text('Add API Key — Unlock Free'),
+            ),
           ),
           const SizedBox(height: 12),
         ],

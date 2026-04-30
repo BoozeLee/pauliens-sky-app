@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import '../models/culture_chart.dart';
 import '../services/chart_engine.dart';
 import '../services/fixed_stars.dart';
+import '../services/premium_service.dart';
 import '../theme/cosmic_theme.dart';
 import '../widgets/personality_radar.dart';
+import '../widgets/premium_gate.dart';
+import '../widgets/share_card.dart';
 import '../widgets/sky_background.dart';
 
 class PersonalityScreen extends StatelessWidget {
@@ -41,6 +44,12 @@ class PersonalityScreen extends StatelessWidget {
                     _CrossCultureSummary(chart: chart),
                     const SizedBox(height: 20),
                     _FixedStarsSection(chart: chart),
+                    const SizedBox(height: 20),
+                    PremiumGate(
+                      feature: PremiumFeature.shareCard,
+                      customLabel: 'Share Card',
+                      child: ShareCardButton(chart: chart),
+                    ),
                     const SizedBox(height: 32),
                   ]),
                 ),

@@ -73,6 +73,20 @@ class FixedStars {
       behenian: true, herb: 'Juniper', stone: 'Beryl',
     ),
     FixedStar(
+      name: 'Procyon', constellation: 'Canis Minor',
+      longitude: 115.8, magnitude: 0.34,
+      nature: 'Mercury/Mars', keywords: 'swiftness, cunning, sudden fame, restlessness',
+      mythology: 'Forerunner of the Dog — rises before Sirius, heralding the flood. Gifts of quick wit, commercial acumen, and popularity that can vanish as fast as it arrives.',
+      behenian: true, herb: 'Marigold', stone: 'Agate',
+    ),
+    FixedStar(
+      name: 'Algorab', constellation: 'Corvus',
+      longitude: 193.4, magnitude: 2.95,
+      nature: 'Saturn/Mars', keywords: 'subtlety, craftiness, greed, destructiveness',
+      mythology: 'The Crow — Apollo\'s raven who brought news of infidelity and was punished with eternal thirst. A star of cunning and sharp perception, wielded well or ill.',
+      behenian: true, herb: 'Burdock', stone: 'Onyx',
+    ),
+    FixedStar(
       name: 'Regulus', constellation: 'Leo',
       longitude: 149.8, magnitude: 1.35,
       nature: 'Mars/Jupiter', keywords: 'royalty, nobility, power, the watcher of the North',

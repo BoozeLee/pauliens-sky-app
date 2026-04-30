@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Paulien's Sky
+GenericName=Cultural Astrology
+Comment=One birth sky, six traditions — Western, Vedic, Chinese, Mayan, Egyptian, Celtic
+Exec=pauliens_sky
+Icon=com.pauliensky.PauliensSky
+Categories=Education;Science;
+Keywords=astrology;horoscope;zodiac;chart;birth;
+StartupNotify=true
