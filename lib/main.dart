@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'services/locale_service.dart';
 import 'services/premium_service.dart';
+import 'services/ui_schema.dart';
 import 'state/app_state.dart';
 import 'app.dart';
 
@@ -11,6 +12,7 @@ void main() async {
 
   await PremiumService.init();
   await LocaleService.init();
+  await UiSchema.load();
 
   final appState = AppState();
   await appState.init();

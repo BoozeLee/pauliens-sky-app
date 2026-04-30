@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/locale_service.dart';
+import '../services/ui_schema.dart';
 import '../theme/cosmic_theme.dart';
+import '../state/app_state.dart';
 import 'home_screen.dart';
 import 'chart_screen.dart';
 import 'ai_screen.dart';
 import 'explore_screen.dart';
 import 'settings_screen.dart';
-import '../state/app_state.dart';
-import 'package:provider/provider.dart';
 
 class MainNav extends StatefulWidget {
   final int initialTab;
@@ -68,24 +70,12 @@ class _CosmicNavBar extends StatelessWidget {
   final ValueChanged<int> onTap;
   const _CosmicNavBar({required this.currentIndex, required this.onTap});
 
-  static const _items = [
-    (Icons.home_outlined, Icons.home, 'Home'),
-    (Icons.auto_awesome_outlined, Icons.auto_awesome, 'Chart'),
-    (Icons.psychology_outlined, Icons.psychology, 'AI'),
-    (Icons.explore_outlined, Icons.explore, 'Explore'),
-    (Icons.settings_outlined, Icons.settings, 'Settings'),
-  ];
-
-  static const _colors = [
-    CosmicColors.neonLavender,
-    CosmicColors.neonCyan,
-    CosmicColors.neonPink,
-    CosmicColors.neonYellow,
-    CosmicColors.textSecondary,
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final isNl = context.watch<LocaleService>().isNl;
+    final tabs = [...UiSchema.instance.navTabs]
+      ..sort((a, b) => a.index.compareTo(b.index));
+
     return Container(
       decoration: BoxDecoration(
         color: CosmicColors.surface,
@@ -98,31 +88,37 @@ class _CosmicNavBar extends StatelessWidget {
         child: SizedBox(
           height: 60,
           child: Row(
-            children: List.generate(_items.length, (i) {
-              final (outline, filled, label) = _items[i];
-              final selected = i == currentIndex;
-              final color = selected ? _colors[i] : CosmicColors.textMuted;
+            children: tabs.map((tab) {
+              final selected = tab.index == currentIndex;
+              final color = selected ? tab.accent : CosmicColors.textMuted;
+              final icon = selected
+                  ? SchemaIcons.resolve(tab.iconFilled)
+                  : SchemaIcons.resolve(tab.iconOutlined);
+              final label = isNl ? tab.labelNl : tab.labelEn;
               return Expanded(
                 child: InkWell(
-                  onTap: () => onTap(i),
+                  onTap: () => onTap(tab.index),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(selected ? filled : outline, color: color, size: 22),
+                      Icon(icon, color: color, size: 22),
                       const SizedBox(height: 3),
-                      Text(label,
-                          style: TextStyle(
-                              color: color,
-                              fontSize: 10,
-                              fontWeight: selected
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
-                              letterSpacing: 0.3)),
+                      Text(
+                        label,
+                        style: TextStyle(
+                          color: color,
+                          fontSize: 10,
+                          fontWeight: selected
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
                     ],
                   ),
                 ),
               );
-            }),
+            }).toList(),
           ),
         ),
       ),

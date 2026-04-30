@@ -3,9 +3,12 @@ import 'package:provider/provider.dart';
 import '../models/culture_chart.dart';
 import '../models/profile.dart';
 import '../services/chart_engine.dart';
+import '../services/locale_service.dart';
+import '../services/ui_schema.dart';
 import '../state/app_state.dart';
 import '../theme/cosmic_theme.dart';
 import '../widgets/daily_reading_card.dart';
+import '../widgets/schema_card.dart';
 import '../widgets/sky_background.dart';
 import 'birth_input_screen.dart';
 import 'chart_screen.dart';
@@ -224,15 +227,15 @@ class _ProfileCard extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _SignBadge('☉ ${western.sunSign ?? 'Pisces'}',
+                SchemaSignBadge('☉ ${western.sunSign ?? 'Pisces'}',
                     CosmicColors.neonCyan),
-                _SignBadge(
+                SchemaSignBadge(
                     '☽ ${western.moonSign ?? ''}',
                     CosmicColors.textSecondary),
-                _SignBadge(
+                SchemaSignBadge(
                     '龍 ${chinese?.sunSign ?? 'Wood Rat'}',
                     CosmicColors.neonPink),
-                _SignBadge(
+                SchemaSignBadge(
                     '☀ ${mayan?.sunSign ?? 'Ben'}',
                     CosmicColors.neonYellow),
               ],
@@ -264,27 +267,6 @@ class _ProfileCard extends StatelessWidget {
         '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
       ][m];
-}
-
-class _SignBadge extends StatelessWidget {
-  final String text;
-  final Color color;
-  const _SignBadge(this.text, this.color);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
-      ),
-      child: Text(text,
-          style:
-              TextStyle(color: color, fontSize: 12, letterSpacing: 0.3)),
-    );
-  }
 }
 
 // ── New reading button ─────────────────────────────────────────────────────
@@ -348,17 +330,12 @@ class _TraditionsGrid extends StatelessWidget {
   final FullChart? chart;
   const _TraditionsGrid({this.chart});
 
-  static const _traditions = [
-    ('Western', '♈', CosmicColors.western, 'Tropical zodiac, houses, planets', 0),
-    ('Chinese', '龍', CosmicColors.chinese, 'Ba Zi, animals, five elements', 2),
-    ('Vedic', '🕉', CosmicColors.vedic, 'Sidereal, nakshatras, Jyotish', 1),
-    ('Mayan', '☀', CosmicColors.mayan, 'Tzolk\'in, day signs, tones', 3),
-    ('Egyptian', '𓂀', CosmicColors.egyptian, '36 decans, deity rulers', 4),
-    ('Celtic', '🌿', CosmicColors.celtic, 'Tree calendar, ogham, animals', 5),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final isNl = context.watch<LocaleService>().isNl;
+    final traditions = [...UiSchema.instance.traditions]
+      ..sort((a, b) => a.tabIndex.compareTo(b.tabIndex));
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -368,44 +345,20 @@ class _TraditionsGrid extends StatelessWidget {
         mainAxisSpacing: 10,
         childAspectRatio: 1.5,
       ),
-      itemCount: _traditions.length,
+      itemCount: traditions.length,
       itemBuilder: (ctx, i) {
-        final (name, emoji, color, desc, tabIndex) = _traditions[i];
-        return GestureDetector(
+        final trad = traditions[i];
+        return TraditionCard(
+          tradition: trad,
+          label: isNl ? trad.labelNl : trad.labelEn,
+          description: isNl ? trad.descriptionNl : trad.descriptionEn,
           onTap: () {
             final bc = chart?.context ?? Profile.paulien.birthContext;
             Navigator.of(context).push(MaterialPageRoute(
               builder: (_) =>
-                  ChartScreen(birthContext: bc, initialTab: tabIndex),
+                  ChartScreen(birthContext: bc, initialTab: trad.tabIndex),
             ));
           },
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: CosmicColors.card,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: color.withValues(alpha: 0.3)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(emoji, style: const TextStyle(fontSize: 20)),
-                const Spacer(),
-                Text(name,
-                    style: TextStyle(
-                        color: color,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5)),
-                const SizedBox(height: 2),
-                Text(desc,
-                    style: const TextStyle(
-                        color: CosmicColors.textMuted, fontSize: 10),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis),
-              ],
-            ),
-          ),
         );
       },
     );

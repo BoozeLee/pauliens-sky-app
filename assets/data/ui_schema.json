@@ -1,0 +1,283 @@
+{
+  "version": "1.1",
+  "app": {
+    "name_en": "Paulien's Sky",
+    "name_nl": "Pauliens Hemel",
+    "tagline_en": "One sky. Many traditions.",
+    "tagline_nl": "Één hemel. Vele tradities.",
+    "palette": {
+      "background":    "#0A0520",
+      "surface":       "#130A2E",
+      "card":          "#1A1040",
+      "divider":       "#2A1F5A",
+      "text_primary":  "#E8E0FF",
+      "text_secondary":"#9B8FCC",
+      "text_muted":    "#5C4F8A"
+    },
+    "accents": {
+      "lavender": "#B39DDB",
+      "cyan":     "#00F5FF",
+      "pink":     "#FF6EC7",
+      "yellow":   "#FFD54F",
+      "green":    "#69F0AE",
+      "orange":   "#FF9800"
+    }
+  },
+
+  "nav_tabs": [
+    {
+      "id": "home",
+      "label_en": "Home",
+      "label_nl": "Thuis",
+      "icon_outlined": "home_outlined",
+      "icon_filled":   "home",
+      "accent":        "#B39DDB",
+      "index":         0
+    },
+    {
+      "id": "chart",
+      "label_en": "Chart",
+      "label_nl": "Kaart",
+      "icon_outlined": "auto_awesome_outlined",
+      "icon_filled":   "auto_awesome",
+      "accent":        "#00F5FF",
+      "index":         1
+    },
+    {
+      "id": "ai",
+      "label_en": "AI",
+      "label_nl": "AI",
+      "icon_outlined": "psychology_outlined",
+      "icon_filled":   "psychology",
+      "accent":        "#FF6EC7",
+      "index":         2
+    },
+    {
+      "id": "explore",
+      "label_en": "Explore",
+      "label_nl": "Ontdekken",
+      "icon_outlined": "explore_outlined",
+      "icon_filled":   "explore",
+      "accent":        "#FFD54F",
+      "index":         3
+    },
+    {
+      "id": "settings",
+      "label_en": "Settings",
+      "label_nl": "Instellingen",
+      "icon_outlined": "settings_outlined",
+      "icon_filled":   "settings",
+      "accent":        "#90A4AE",
+      "index":         4
+    }
+  ],
+
+  "traditions": [
+    {
+      "id": "western",
+      "culture_id": "western",
+      "label_en": "Western",
+      "label_nl": "Westers",
+      "symbol": "♈",
+      "accent":  "#00F5FF",
+      "art_asset": "assets/art/western_bg.png",
+      "card_gradient": ["#00F5FF1A", "#00F5FF06"],
+      "gradient_begin": "topLeft",
+      "gradient_end":   "bottomRight",
+      "border_radius": 18,
+      "description_en": "Tropical zodiac, houses, planets",
+      "description_nl": "Tropische dierenriem, huizen, planeten",
+      "tab_index": 0,
+      "star_density": 120,
+      "star_color": "#00F5FF",
+      "glyph_size": 64,
+      "glyph_opacity": 0.12
+    },
+    {
+      "id": "vedic",
+      "culture_id": "vedic",
+      "label_en": "Vedic",
+      "label_nl": "Vedisch",
+      "symbol": "🕉",
+      "accent":  "#FF9800",
+      "art_asset": "assets/art/vedic_bg.png",
+      "card_gradient": ["#FF98001A", "#FF980006"],
+      "gradient_begin": "topLeft",
+      "gradient_end":   "bottomRight",
+      "border_radius": 18,
+      "description_en": "Sidereal, nakshatras, Jyotish",
+      "description_nl": "Siderisch, nakshatras, Jyotish",
+      "tab_index": 2,
+      "star_density": 80,
+      "star_color": "#FF9800",
+      "glyph_size": 72,
+      "glyph_opacity": 0.10
+    },
+    {
+      "id": "chinese",
+      "culture_id": "chinese",
+      "label_en": "Chinese",
+      "label_nl": "Chinees",
+      "symbol": "龍",
+      "accent":  "#FF6EC7",
+      "art_asset": "assets/art/chinese_bg.png",
+      "card_gradient": ["#FF6EC71A", "#FF6EC706"],
+      "gradient_begin": "topLeft",
+      "gradient_end":   "bottomRight",
+      "border_radius": 18,
+      "description_en": "Ba Zi, animals, five elements",
+      "description_nl": "Ba Zi, dieren, vijf elementen",
+      "tab_index": 1,
+      "star_density": 60,
+      "star_color": "#FF6EC7",
+      "glyph_size": 80,
+      "glyph_opacity": 0.13
+    },
+    {
+      "id": "mayan",
+      "culture_id": "mayan",
+      "label_en": "Mayan",
+      "label_nl": "Mayaans",
+      "symbol": "☀",
+      "accent":  "#FFD54F",
+      "art_asset": "assets/art/mayan_bg.png",
+      "card_gradient": ["#FFD54F1A", "#FFD54F06"],
+      "gradient_begin": "topLeft",
+      "gradient_end":   "bottomRight",
+      "border_radius": 18,
+      "description_en": "Tzolk'in, day signs, tones",
+      "description_nl": "Tzolk'in, dagstekens, tonen",
+      "tab_index": 3,
+      "star_density": 40,
+      "star_color": "#FFD54F",
+      "glyph_size": 70,
+      "glyph_opacity": 0.14
+    },
+    {
+      "id": "egyptian",
+      "culture_id": "egyptian",
+      "label_en": "Egyptian",
+      "label_nl": "Egyptisch",
+      "symbol": "𓂀",
+      "accent":  "#FFF176",
+      "art_asset": "assets/art/egyptian_bg.png",
+      "card_gradient": ["#FFF1761A", "#FFF17606"],
+      "gradient_begin": "topLeft",
+      "gradient_end":   "bottomRight",
+      "border_radius": 18,
+      "description_en": "36 decans, deity rulers",
+      "description_nl": "36 dekanen, godheden",
+      "tab_index": 4,
+      "star_density": 50,
+      "star_color": "#FFF176",
+      "glyph_size": 68,
+      "glyph_opacity": 0.11
+    },
+    {
+      "id": "celtic",
+      "culture_id": "celtic",
+      "label_en": "Celtic",
+      "label_nl": "Keltisch",
+      "symbol": "🌿",
+      "accent":  "#69F0AE",
+      "art_asset": "assets/art/celtic_bg.png",
+      "card_gradient": ["#69F0AE1A", "#69F0AE06"],
+      "gradient_begin": "topLeft",
+      "gradient_end":   "bottomRight",
+      "border_radius": 18,
+      "description_en": "Tree calendar, ogham, animals",
+      "description_nl": "Boomkalender, ogham, dieren",
+      "tab_index": 5,
+      "star_density": 90,
+      "star_color": "#69F0AE",
+      "glyph_size": 60,
+      "glyph_opacity": 0.12
+    }
+  ],
+
+  "card_templates": {
+    "profile_hero": {
+      "type": "gradient_border",
+      "border_radius": 20,
+      "padding": 20,
+      "border_width": 1,
+      "art_position": "top_right",
+      "art_opacity": 0.15,
+      "gradient_begin": "topLeft",
+      "gradient_end": "bottomRight"
+    },
+    "daily_reading": {
+      "type": "gradient_fill",
+      "border_radius": 18,
+      "padding": 18,
+      "gradient_begin": "topLeft",
+      "gradient_end": "bottomRight",
+      "accent_key": "pink"
+    },
+    "fixed_star": {
+      "type": "outlined",
+      "border_radius": 14,
+      "padding": 16,
+      "expandable": true,
+      "accent_source": "tradition",
+      "accent_key": "yellow"
+    },
+    "sign_badge": {
+      "type": "pill",
+      "border_radius": 20,
+      "padding_h": 10,
+      "padding_v": 5,
+      "bg_opacity": 0.12,
+      "border_opacity": 0.4
+    },
+    "section_label": {
+      "font_size": 10,
+      "letter_spacing": 2.0,
+      "color_key": "text_muted"
+    },
+    "insight_block": {
+      "type": "tinted_outlined",
+      "border_radius": 12,
+      "padding": 16,
+      "bg_opacity": 0.06,
+      "border_opacity": 0.2
+    }
+  },
+
+  "star_field": {
+    "star_count": 180,
+    "base_color": "#FFFFFF",
+    "min_radius": 0.5,
+    "max_radius": 1.8,
+    "twinkle_speed_ms": 3000,
+    "layer_count": 3
+  },
+
+  "zodiac_wheel": {
+    "tropical_color":  "#00F5FF",
+    "sidereal_color":  "#B39DDB",
+    "planet_dot_size": 2.5,
+    "asc_line_color":  "#00F5FF",
+    "mc_line_color":   "#00F5FF",
+    "divider_opacity": 0.25,
+    "legend_font_size": 9
+  },
+
+  "ai_screen": {
+    "local_color":  "#69F0AE",
+    "claude_color": "#B39DDB",
+    "gemini_color": "#FF6EC7",
+    "bubble_user_color":      "#B39DDB1A",
+    "bubble_assistant_color": "#1A1040",
+    "thinking_label_en": "Reading the stars…",
+    "thinking_label_nl": "De sterren raadplegen…"
+  },
+
+  "animations": {
+    "page_transition_ms":  300,
+    "card_hover_scale":    1.02,
+    "tab_switch_ms":       200,
+    "star_twinkle_min_ms": 2000,
+    "star_twinkle_max_ms": 5000
+  }
+}

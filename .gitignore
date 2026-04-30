@@ -29,3 +29,6 @@ build/
 *.DS_Store
 .env
 secrets/
+
+# llama.cpp embedded repo (add as submodule if needed)
+native/llama/llama.cpp/
