@@ -267,7 +267,14 @@ class _TraditionsGrid extends StatelessWidget {
       itemCount: _traditions.length,
       itemBuilder: (ctx, i) {
         final (name, emoji, color, desc) = _traditions[i];
-        return Container(
+        return GestureDetector(
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => ChartScreen(
+              birthContext:
+                  ChartEngine().compute(Profile.paulien.birthContext).context,
+            ),
+          )),
+          child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: CosmicColors.card,
@@ -293,6 +300,7 @@ class _TraditionsGrid extends StatelessWidget {
                   overflow: TextOverflow.ellipsis),
             ],
           ),
+        ),
         );
       },
     );

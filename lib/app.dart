@@ -1,26 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'state/app_state.dart';
 import 'screens/splash_screen.dart';
 import 'theme/cosmic_theme.dart';
 
 class PauliensApp extends StatelessWidget {
-  const PauliensApp({super.key});
+  final AppState appState;
+  const PauliensApp({super.key, required this.appState});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Paulien's Sky",
-      theme: CosmicTheme.dark,
-      debugShowCheckedModeBanner: false,
-      // Constrain to phone-width on desktop so the mobile UI looks correct
-      builder: (context, child) {
-        return Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
-            child: child!,
-          ),
-        );
-      },
-      home: const SplashScreen(),
+    return ChangeNotifierProvider<AppState>.value(
+      value: appState,
+      child: MaterialApp(
+        title: "Paulien's Sky",
+        theme: CosmicTheme.dark,
+        debugShowCheckedModeBanner: false,
+        builder: (context, child) {
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: child!,
+            ),
+          );
+        },
+        home: const SplashScreen(),
+      ),
     );
   }
 }

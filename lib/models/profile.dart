@@ -6,28 +6,43 @@ class Profile {
   final String name;
   final BirthContext birthContext;
   final bool isDefault;
+  final bool birthTimeKnown;
 
   const Profile({
     required this.id,
     required this.name,
     required this.birthContext,
     this.isDefault = false,
+    this.birthTimeKnown = true,
   });
 
-  // Paulien's birth profile — 13 March 1996
-  // Birth time set to noon UTC as default until user provides exact time.
-  // Birth city: to be confirmed by user; using Amsterdam (52.37, 4.90) as default.
+  // Paulien — 13 March 1996, Hasselt, Belgium
+  // Birth time unknown → synthetic noon local (CET = UTC+1 → 11:00 UTC)
+  // Hasselt: 50.9311°N, 5.3378°E
   static final paulien = Profile(
     id: 'paulien',
     name: 'Paulien',
     isDefault: true,
+    birthTimeKnown: false,
     birthContext: BirthContext(
-      utcTime: DateTime.utc(1996, 3, 13, 12, 0, 0),
-      latitude: 52.3676,
-      longitude: 4.9041,
-      locationName: 'Amsterdam, Netherlands',
+      utcTime: DateTime.utc(1996, 3, 13, 11, 0, 0), // noon CET
+      latitude: 50.9311,
+      longitude: 5.3378,
+      locationName: 'Hasselt, Belgium',
       personName: 'Paulien',
     ),
+  );
+
+  Profile copyWith({
+    String? name,
+    BirthContext? birthContext,
+    bool? birthTimeKnown,
+  }) => Profile(
+    id: id,
+    name: name ?? this.name,
+    birthContext: birthContext ?? this.birthContext,
+    isDefault: isDefault,
+    birthTimeKnown: birthTimeKnown ?? this.birthTimeKnown,
   );
 
   Map<String, dynamic> toJson() => {
@@ -35,6 +50,7 @@ class Profile {
     'name': name,
     'birthContext': birthContext.toJson(),
     'isDefault': isDefault,
+    'birthTimeKnown': birthTimeKnown,
   };
 
   factory Profile.fromJson(Map<String, dynamic> json) => Profile(
@@ -42,6 +58,7 @@ class Profile {
     name: json['name'] as String,
     birthContext: BirthContext.fromJson(json['birthContext'] as Map<String, dynamic>),
     isDefault: json['isDefault'] as bool? ?? false,
+    birthTimeKnown: json['birthTimeKnown'] as bool? ?? true,
   );
 
   String toJsonString() => jsonEncode(toJson());

@@ -18,6 +18,9 @@ dependencies:
   # HTTP for ephemeris APIs
   http: ^1.2.0
 
+  # State management
+  provider: ^6.1.2
+
   # Local storage
   shared_preferences: ^2.2.3
 

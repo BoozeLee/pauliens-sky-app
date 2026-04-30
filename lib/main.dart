@@ -1,12 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'services/premium_service.dart';
+import 'state/app_state.dart';
 import 'app.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Mobile-only calls — skip on desktop/web to avoid MissingPluginException
+  await PremiumService.init();
+
+  final appState = AppState();
+  await appState.init();
+
   if (defaultTargetPlatform == TargetPlatform.android ||
       defaultTargetPlatform == TargetPlatform.iOS) {
     SystemChrome.setPreferredOrientations([
@@ -20,5 +26,5 @@ void main() {
     ));
   }
 
-  runApp(const PauliensApp());
+  runApp(PauliensApp(appState: appState));
 }
