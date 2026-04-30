@@ -1,0 +1,31 @@
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+build/
+
+# Android
+**/android/gradlew
+**/android/gradlew.bat
+**/android/gradle/wrapper/
+**/android/local.properties
+**/android/**/*.iml
+**/android/.gradle
+
+# iOS
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Generated.xcconfig
+**/ios/Runner/GeneratedPluginRegistrant.*
+
+# macOS
+**/macos/Flutter/ephemeral
+
+# Misc
+*.log
+*.DS_Store
+.env
+secrets/

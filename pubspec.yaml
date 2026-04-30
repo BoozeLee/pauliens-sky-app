@@ -1,0 +1,56 @@
+name: pauliens_sky
+description: A cultural astrology engine — one sky, many traditions.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Date/time utilities
+  intl: ^0.20.2
+
+  # HTTP for ephemeris APIs
+  http: ^1.2.0
+
+  # Local storage
+  shared_preferences: ^2.2.3
+
+  # UI
+  google_fonts: ^6.2.1
+  flutter_svg: ^2.0.10+1
+  cached_network_image: ^3.3.1
+
+  # Charts / custom painting helpers
+  fl_chart: ^0.68.0
+
+  # Chinese astrology (BaZi, Zi Wei Dou Shu, Chinese zodiac)
+  dart_iztro: ^2.0.0
+
+  # Geocoding (lat/lon from city name)
+  geocoding: ^3.0.0
+
+  # Timezone
+  timezone: ^0.9.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/art/
+    - assets/data/
+  fonts:
+    - family: Cinzel
+      fonts:
+        - asset: assets/fonts/Cinzel-Regular.ttf
+        - asset: assets/fonts/Cinzel-Bold.ttf
+          weight: 700
