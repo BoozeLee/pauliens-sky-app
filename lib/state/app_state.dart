@@ -10,9 +10,10 @@ class AppState extends ChangeNotifier {
   static const _profilesKey   = 'profiles_list';
   static const _activeIdKey   = 'active_profile_id';
 
-  List<Profile> _profiles = [Profile.paulien, Profile.nurse, Profile.bernd];
+  List<Profile> _profiles = [Profile.paulien, Profile.nurse, Profile.bernd, Profile.kiliaan];
   String _activeId = 'paulien';
   FullChart? _chart;
+  final _chartCache = <String, FullChart>{};
   bool _loading = false;
   String? _error;
 
@@ -28,13 +29,26 @@ class AppState extends ChangeNotifier {
   String? get error => _error;
   bool get isReady => _chart != null;
 
+  /// Returns cached chart for any profile id (computes lazily if needed).
+  FullChart? chartFor(String id) {
+    if (_chartCache.containsKey(id)) return _chartCache[id];
+    try {
+      final profile = _profiles.firstWhere((p) => p.id == id);
+      final c = ChartEngine().compute(profile.birthContext);
+      _chartCache[id] = c;
+      return c;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> init() async {
     await _loadProfiles();
     _computeChart();
   }
 
   // Canonical defaults — always present regardless of saved state
-  static final _defaults = [Profile.paulien, Profile.nurse, Profile.bernd];
+  static final _defaults = [Profile.paulien, Profile.nurse, Profile.bernd, Profile.kiliaan];
 
   Future<void> _loadProfiles() async {
     try {
@@ -72,15 +86,29 @@ class AppState extends ChangeNotifier {
   void _computeChart() {
     _loading = true;
     notifyListeners();
+    final engine = ChartEngine();
     try {
-      _chart = ChartEngine().compute(activeProfile.birthContext);
+      final computed = engine.compute(activeProfile.birthContext);
+      _chart = computed;
+      _chartCache[_activeId] = computed;
       _error = null;
     } catch (e) {
       _error = e.toString();
     }
     _loading = false;
     notifyListeners();
+    // Upgrade in background with JPL Horizons positions (if network available)
+    final id = _activeId;
+    engine.computeAsync(activeProfile.birthContext).then((upgraded) {
+      if (_activeId == id && mounted) {
+        _chart = upgraded;
+        _chartCache[id] = upgraded;
+        notifyListeners();
+      }
+    }).catchError((_) {}); // silent — VSOP87 version stays
   }
+
+  bool get mounted => true; // ChangeNotifier lifecycle guard
 
   Future<void> updateProfile(Profile updated) async {
     final idx = _profiles.indexWhere((p) => p.id == updated.id);

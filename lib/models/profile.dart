@@ -64,6 +64,25 @@ class Profile {
     ),
   );
 
+  // Kiliaan — 20 April 1986, 11:11 CEST (UTC+2) → 09:11 UTC, Leuven, Belgium
+  // Leuven: 50.8798°N, 4.7005°E  (April 1986: CEST started March 30, 1986)
+  // ASC: Cancer 19°  MC: Pisces 19°  Sun: Taurus 0.3°  Vedic: Aries 6.7° (Ashwini)
+  // Chinese: Fire Tiger  Celtic: Willow (Saille)  Zoroastrian: Ardibehesht 1st day
+  // Parents: Ingrid & Walter
+  static final kiliaan = Profile(
+    id: 'kiliaan',
+    name: 'Kiliaan',
+    isDefault: false,
+    birthTimeKnown: true,
+    birthContext: BirthContext(
+      utcTime: DateTime.utc(1986, 4, 20, 9, 11, 0),
+      latitude: 50.8798,
+      longitude: 4.7005,
+      locationName: 'Leuven, Belgium',
+      personName: 'Kiliaan',
+    ),
+  );
+
   Profile copyWith({
     String? name,
     BirthContext? birthContext,

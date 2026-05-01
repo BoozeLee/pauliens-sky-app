@@ -60,40 +60,100 @@
 
 ---
 
-## 🔨 In Progress / Next Sprint
+## ✅ Recently Completed
 
-### T4 — JPL Horizons Ephemeris
-**API:** https://ssd.jpl.nasa.gov/api/horizons.api — no auth, 60 req/hr
-- [ ] `HorizonsService.fetchPositions(BirthContext)` — 10 HTTP calls, one per planet
-- [ ] IERS Delta-T polynomial (Espenak & Meeus) applied to JDE
-- [ ] Disk cache by JDE (birth charts never change → cache forever)
-- [ ] Fallback to existing VSOP87 on network error
-- [ ] ChartEngine.computeAsync() integrating Horizons
+### T11 — Kiliaan Profile ✅
+- [x] Profile added: 20 Apr 1986, 11:11 CEST (09:11 UTC), Leuven (50.8798°N 4.7005°E)
+- [x] ASC: Cancer 19.0°  MC: Pisces 19.8°  Sun: Taurus 0.3°
+- [x] Vedic: Aries 6.7°, Ashwini nakshatra
+- [x] Chinese: Fire Tiger | Celtic: Willow (Saille) | Zoroastrian: Ardibehesht 1st day
+- [x] 11:11 = Master Number — born at the threshold gateway
+- [x] Added to penta_mind.py _PROFILES + corpus expanded to 40+ passages
+- [x] AppState._defaults + profile switcher
 
-### T5 — IERS Delta-T Correction
-**Source:** https://iers.org/data/ (Bulletin B CSV, no auth)
-- [ ] Polynomial ΔT for 1986–2026 (Espenak & Meeus table)
-- [ ] Apply to EphemerisService._julianDay → julianEphemerisDay
-- [ ] For Paulien 1996: ΔT ≈ 61.6s; for Bernd 2000: ΔT ≈ 63.8s; for Nurse 2001: ΔT ≈ 64.1s
+### T12 — Secure API Key Storage ✅
+- [x] flutter_secure_storage ^9.0.0 added to pubspec
+- [x] PremiumService: keys stored in Android Keystore / iOS Keychain
+- [x] Migration: stale SharedPreferences keys auto-migrated on first run
+- [x] Sync in-memory cache populated at startup via loadApiKeys()
 
-### T6 — HYG Star Catalog (replaces hardcoded BSC table)
-**Source:** https://github.com/astronexus/HYG-Database (CSV, 119k stars)
-- [ ] Download hygdata_v41.csv, filter magnitude ≤ 4.0 (~2300 stars)
-- [ ] Convert RA/Dec → ecliptic longitude (J2000)
-- [ ] Generate assets/data/bright_stars.json
-- [ ] Update FixedStars to load from JSON asset
-- [ ] Expand to top 60+ stars visible in chart (was 18 hardcoded)
+### T13 — AI Status Indicator ✅
+- [x] _AiStatusRow widget in AI screen header
+- [x] 🟢/⚫ dots for AETHER, Claude, Gemini with tooltips
 
-### T7 — NASA APOD Home Screen Widget
-**API:** https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY — free, 1000/hr
-- [ ] `ApodService.fetchToday()` — daily cache in SharedPreferences
-- [ ] `ApodCard` widget — CachedNetworkImage + title overlay + explanation
-- [ ] Wire into home screen above traditions grid
-- [ ] Handle mediaType=video gracefully (show thumbnail)
+### T14 — Developer Tooling ✅
+- [x] Makefile with build, run, apod, horizons, stars, iers, penta, push targets
+- [x] scripts/task_runner.py — parses TASKS.md, interactive TUI, --auto mode
+- [x] scripts/fetch_apis.py — NASA APOD, JPL Horizons, IERS Bulletin B
+
+### T15 — Corpus Expansion ✅
+- [x] penta_mind.py corpus expanded from 14 → 40+ passages
+- [x] 5+ passages per tradition (Western, Vedic, Chinese, Mayan, Egyptian, Celtic, Zoroastrian)
+- [x] Taurus/cusp, Fire Tiger, Willow, Ashwini, Ardibehesht passages added
+- [x] 11:11 Master Number passage added
+
+
+### T4 — JPL Horizons Ephemeris ✅
+- [x] `HorizonsService.fetchPositions(BirthContext)` — 10 HTTP calls, one per planet
+- [x] IERS Delta-T polynomial (Espenak & Meeus 2006) applied to JDE
+- [x] Disk cache by JDE key (birth charts never change → cache forever)
+- [x] Fallback to VSOP87 on network error
+- [x] ChartEngine.computeAsync() — tries Horizons, falls back gracefully
+
+### T5 — IERS Delta-T Correction ✅
+- [x] Polynomial ΔT for 1986–2026 (Espenak & Meeus 2006 table)
+- [x] Embedded in HorizonsService.deltaT() + HorizonsService.jde()
+
+### T6 — HYG Star Catalog ✅
+- [x] Download hyg_v38.csv.gz (gzipped), filter magnitude ≤ 4.0 → 518 stars
+- [x] Convert RA/Dec → ecliptic longitude (J2000, ε = 23.4392911°)
+- [x] Generated assets/data/bright_stars.json
+- [x] scripts/build_star_catalog.py
+
+### T7 — NASA APOD Home Screen Widget ✅
+- [x] `ApodService.fetchToday()` — memory + daily SharedPrefs cache
+- [x] `ApodCard` widget — CachedNetworkImage, expandable explanation
+- [x] Wired into home screen (new "TODAY IN THE COSMOS" section)
+- [x] Video mediaType handled (YouTube thumbnail + play icon)
+
+### T8 — Profile Comparison Screen ✅
+- [x] `ProfileComparisonScreen` — shared/unique traits, sign tables across all 7 traditions
+- [x] Trait bar chart (dual-color overlay per profile)
+- [x] Compare button wired into HomeScreen
+- [x] AppState.chartFor(id) — lazy per-profile chart cache
+
+### T9 — AETHER Penta-Mind ✅
+- [x] `scripts/penta_mind.py` — uv-runnable, 5-layer prompt architecture
+- [x] Layer 1: TF-IDF RAG over 14 embedded classical passages
+- [x] Layer 2: JSONL rolling memory journal per profile
+- [x] Layer 3: Birth chart context (all 7 traditions)
+- [x] Layer 4: Tradition culture frame (7 available)
+- [x] Layer 5: User query
+- [x] Claude API integration with rich terminal output
+
+### T10 — Omarchy Desktop Entry ✅
+- [x] `~/.local/share/applications/pauliens_sky.desktop` created
+
+## 🔨 Next Sprint
 
 ---
 
+### Remaining T6 work
+- [ ] Update `FixedStars` service to load from `assets/data/bright_stars.json` (currently hardcoded 18 stars)
+- [ ] Expand chart display to top 60+ brightest stars
+
 ## 📋 Backlog
+
+- [ ] FixedStars service: load from assets/data/bright_stars.json (not hardcoded 18 stars)
+- [ ] Synastry / compatibility engine between two profiles
+- [ ] Transit calculator — current sky vs natal chart overlay
+- [ ] Android APK build + distribution
+- [ ] Push notification: daily reading at sunrise
+- [ ] Offline mode: bundle DE440 ephemeris as binary asset
+- [ ] Prokerala API integration (Indian charts, 300/day free tier)
+- [ ] AETHER: download and compile libaether_llm.so for Linux + Android
+- [ ] Model manager: download Mistral-7B-v0.1.Q4_K_M.gguf (recommended model)
+- [ ] Profile: add birth notes / metadata field (parents, significant events)
 
 ### Astrology APIs to integrate
 | API | URL | Auth | What it gives |
