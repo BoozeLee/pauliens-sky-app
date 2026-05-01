@@ -7,12 +7,14 @@ import '../services/locale_service.dart';
 import '../services/ui_schema.dart';
 import '../state/app_state.dart';
 import '../theme/cosmic_theme.dart';
+import '../widgets/apod_card.dart';
 import '../widgets/daily_reading_card.dart';
 import '../widgets/schema_card.dart';
 import '../widgets/sky_background.dart';
 import 'birth_input_screen.dart';
 import 'chart_screen.dart';
 import 'personality_screen.dart';
+import 'profile_comparison_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -41,11 +43,18 @@ class HomeScreen extends StatelessWidget {
                       _ProfileCard(appState: appState, chart: chart),
                       const SizedBox(height: 20),
                       DailyReadingCard(chart: chart),
+                      const SizedBox(height: 12),
+                      if (appState.profiles.length > 1)
+                        _CompareButton(appState: appState),
                       const SizedBox(height: 24),
                     ],
                     _SectionLabel('READ A NEW SKY'),
                     const SizedBox(height: 12),
                     const _NewReadingButton(),
+                    const SizedBox(height: 24),
+                    _SectionLabel('TODAY IN THE COSMOS'),
+                    const SizedBox(height: 12),
+                    const ApodCard(),
                     const SizedBox(height: 24),
                     _SectionLabel('TRADITIONS'),
                     const SizedBox(height: 12),
@@ -267,6 +276,45 @@ class _ProfileCard extends StatelessWidget {
         '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
       ][m];
+}
+
+// ── Compare profiles button ────────────────────────────────────────────────
+
+class _CompareButton extends StatelessWidget {
+  final AppState appState;
+  const _CompareButton({required this.appState});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => ProfileComparisonScreen(appState: appState))),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: CosmicColors.neonPink.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+              color: CosmicColors.neonPink.withValues(alpha: 0.35)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.compare_arrows,
+                color: CosmicColors.neonPink, size: 16),
+            const SizedBox(width: 8),
+            Text('Compare Profiles',
+                style: const TextStyle(
+                    color: CosmicColors.neonPink, fontSize: 13)),
+            const SizedBox(width: 4),
+            Text('(${appState.profiles.length})',
+                style: const TextStyle(
+                    color: CosmicColors.textMuted, fontSize: 11)),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 // ── New reading button ─────────────────────────────────────────────────────
