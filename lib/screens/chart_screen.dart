@@ -33,6 +33,7 @@ class _ChartScreenState extends State<ChartScreen>
     CultureId.mayan,
     CultureId.egyptian,
     CultureId.celtic,
+    CultureId.zoroastrian,
   ];
 
   @override

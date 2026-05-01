@@ -16,20 +16,51 @@ class Profile {
     this.birthTimeKnown = true,
   });
 
-  // Paulien — 13 March 1996, Hasselt, Belgium
-  // Birth time unknown → synthetic noon local (CET = UTC+1 → 11:00 UTC)
+  // Paulien — 13 March 1996, 09:00 CET (UTC+1) → 08:00 UTC, Hasselt, Belgium
   // Hasselt: 50.9311°N, 5.3378°E
   static final paulien = Profile(
     id: 'paulien',
     name: 'Paulien',
     isDefault: true,
-    birthTimeKnown: false,
+    birthTimeKnown: true,
     birthContext: BirthContext(
-      utcTime: DateTime.utc(1996, 3, 13, 11, 0, 0), // noon CET
+      utcTime: DateTime.utc(1996, 3, 13, 8, 0, 0),
       latitude: 50.9311,
       longitude: 5.3378,
       locationName: 'Hasselt, Belgium',
       personName: 'Paulien',
+    ),
+  );
+
+  // Nurse — 12 October 2001, 07:00 CEST (UTC+2) → 05:00 UTC, Turnhout, Belgium
+  // Turnhout: 51.3225°N, 4.9436°E  (Oct 12 is still CEST in BE)
+  static final nurse = Profile(
+    id: 'nurse',
+    name: 'Nurse',
+    isDefault: false,
+    birthTimeKnown: true,
+    birthContext: BirthContext(
+      utcTime: DateTime.utc(2001, 10, 12, 5, 0, 0),
+      latitude: 51.3225,
+      longitude: 4.9436,
+      locationName: 'Turnhout, Belgium',
+      personName: 'Nurse',
+    ),
+  );
+
+  // Bernd — 23 February 2000, 15:00 CET (UTC+1) → 14:00 UTC, Sint-Truiden, Belgium
+  // Sint-Truiden: 50.8167°N, 5.1833°E  (Feb is CET in BE)
+  static final bernd = Profile(
+    id: 'bernd',
+    name: 'Bernd',
+    isDefault: false,
+    birthTimeKnown: true,
+    birthContext: BirthContext(
+      utcTime: DateTime.utc(2000, 2, 23, 14, 0, 0),
+      latitude: 50.8167,
+      longitude: 5.1833,
+      locationName: 'Sint-Truiden, Belgium',
+      personName: 'Bernd',
     ),
   );
 

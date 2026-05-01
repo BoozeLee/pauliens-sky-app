@@ -10,7 +10,7 @@ class AppState extends ChangeNotifier {
   static const _profilesKey   = 'profiles_list';
   static const _activeIdKey   = 'active_profile_id';
 
-  List<Profile> _profiles = [Profile.paulien];
+  List<Profile> _profiles = [Profile.paulien, Profile.nurse, Profile.bernd];
   String _activeId = 'paulien';
   FullChart? _chart;
   bool _loading = false;

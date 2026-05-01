@@ -192,6 +192,26 @@
       "star_color": "#69F0AE",
       "glyph_size": 60,
       "glyph_opacity": 0.12
+    },
+    {
+      "id": "zoroastrian",
+      "culture_id": "zoroastrian",
+      "label_en": "Zoroastrian",
+      "label_nl": "Zoroastrisch",
+      "symbol": "🔥",
+      "accent":  "#FF9944",
+      "art_asset": "assets/art/zoroastrian_bg.png",
+      "card_gradient": ["#FF99441A", "#FF994406"],
+      "gradient_begin": "topLeft",
+      "gradient_end":   "bottomRight",
+      "border_radius": 18,
+      "description_en": "Avestan months, Yazatas, sacred fire",
+      "description_nl": "Avestische maanden, Yazatas, heilig vuur",
+      "tab_index": 6,
+      "star_density": 70,
+      "star_color": "#FF9944",
+      "glyph_size": 72,
+      "glyph_opacity": 0.13
     }
   ],
 

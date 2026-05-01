@@ -7,6 +7,7 @@ import '../cultures/chinese/chinese_module.dart';
 import '../cultures/mayan/mayan_module.dart';
 import '../cultures/egyptian/egyptian_module.dart';
 import '../cultures/celtic/celtic_module.dart';
+import '../cultures/zoroastrian/zoroastrian_module.dart';
 import 'ephemeris_service.dart';
 import 'fixed_stars.dart';
 
@@ -64,6 +65,7 @@ class ChartEngine {
     MayanModule(),
     EgyptianModule(),
     CelticModule(),
+    ZoroastrianModule(),
   ];
 
   FullChart compute(BirthContext ctx) {
