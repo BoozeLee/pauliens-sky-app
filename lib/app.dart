@@ -18,7 +18,7 @@ class PauliensApp extends StatelessWidget {
             value: LocaleService.instance),
       ],
       child: MaterialApp(
-        title: "Paulien's Sky",
+        title: "Paulien's Sky V2",
         theme: CosmicTheme.dark,
         debugShowCheckedModeBanner: false,
         builder: (context, child) {

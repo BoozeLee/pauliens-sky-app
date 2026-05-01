@@ -33,6 +33,9 @@ class AppState extends ChangeNotifier {
     _computeChart();
   }
 
+  // Canonical defaults — always present regardless of saved state
+  static final _defaults = [Profile.paulien, Profile.nurse, Profile.bernd];
+
   Future<void> _loadProfiles() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -43,7 +46,17 @@ class AppState extends ChangeNotifier {
             .map((e) => Profile.fromJson(e as Map<String, dynamic>))
             .toList();
       }
-      _activeId = prefs.getString(_activeIdKey) ?? _profiles.first.id;
+      // Merge in any default profiles that are missing (e.g. Bernd added in V2)
+      for (final def in _defaults) {
+        if (!_profiles.any((p) => p.id == def.id)) {
+          _profiles.add(def);
+        }
+      }
+      // Always start on Paulien
+      _activeId = prefs.getString(_activeIdKey) ?? 'paulien';
+      if (!_profiles.any((p) => p.id == _activeId)) {
+        _activeId = _profiles.first.id;
+      }
     } catch (_) {}
   }
 

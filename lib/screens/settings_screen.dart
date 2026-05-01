@@ -222,9 +222,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
-                        icon: const Icon(Icons.stars_rounded,
+                        icon: const Icon(Icons.auto_awesome,
                             color: CosmicColors.neonLavender, size: 16),
-                        label: const Text('Upgrade to Premium',
+                        label: const Text("Paulien's Sky V2 — What's New",
                             style: TextStyle(color: CosmicColors.neonLavender)),
                         onPressed: () => Navigator.of(context).push(
                           MaterialPageRoute(
@@ -470,27 +470,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [
         Text(
-          premium.isPremium ? '✦ Premium Unlocked' : '☽ Free Tier',
+          '✦ V2 — Everything Unlocked',
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              color: premium.isPremium
-                  ? CosmicColors.neonGreen
-                  : CosmicColors.textPrimary,
-              fontSize: 15),
+              color: CosmicColors.neonGreen, fontSize: 15),
         ),
-        if (!premium.isPremium) ...[
-          const Spacer(),
-          Text(
-            '${premium.freeAiCallsRemaining}/3 AI calls left today',
-            style: const TextStyle(
-                color: CosmicColors.textMuted, fontSize: 11),
+        const Spacer(),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: CosmicColors.neonGreen.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(8),
           ),
-        ],
+          child: const Text('FREEMIUM',
+              style: TextStyle(color: CosmicColors.neonGreen, fontSize: 9, letterSpacing: 1.5)),
+        ),
       ]),
       const SizedBox(height: 8),
       Text(
-        premium.isPremium
-            ? 'All features unlocked via API key. Thank you!'
-            : 'Add an Anthropic or Gemini API key above to unlock all features for free.',
+        'All 7 traditions, AI readings, personality radar, fixed stars, '
+        'multi-profile support — free in V2. Add an API key for AI features.',
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
       ),
     ]),

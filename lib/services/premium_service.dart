@@ -22,7 +22,7 @@ class PremiumService {
   static const _geminiKey     = 'gemini_api_key';
   static const _aiCallsToday  = 'ai_calls_today';
   static const _aiCallsDate   = 'ai_calls_date';
-  static const _freeAiLimit   = 3; // free tier gets 3 AI calls/day
+  static const _freeAiLimit   = 999; // V2: all features freemium
 
   static PremiumService? _instance;
   static PremiumService get instance => _instance!;
@@ -37,16 +37,11 @@ class PremiumService {
     return _instance!;
   }
 
-  // ── Tier ─────────────────────────────────────────────────────────────────
+  // ── Tier — V2: all features freemium ─────────────────────────────────────
 
-  PremiumTier get tier {
-    // Auto-upgrade to premium if user has own API keys
-    if (hasAnthropicKey || hasGeminiKey) return PremiumTier.premium;
-    final saved = _prefs.getString(_tierKey);
-    return saved == 'premium' ? PremiumTier.premium : PremiumTier.free;
-  }
+  PremiumTier get tier => PremiumTier.premium; // V2: open for everyone
 
-  bool get isPremium => tier == PremiumTier.premium;
+  bool get isPremium => true;
 
   Future<void> setPremium(bool value) async {
     await _prefs.setString(_tierKey, value ? 'premium' : 'free');
@@ -72,19 +67,11 @@ class PremiumService {
     geminiKey:    hasGeminiKey    ? geminiApiKey    : null,
   );
 
-  // ── Feature gates ─────────────────────────────────────────────────────────
+  // ── Feature gates — V2: everything unlocked ───────────────────────────────
 
-  bool canUse(String feature) {
-    if (isPremium) return true;
-    return switch (feature) {
-      PremiumFeature.aiInterpretation => _freeAiCallsRemaining > 0,
-      PremiumFeature.dailyReading     => _freeAiCallsRemaining > 0,
-      // Always free:
-      _ => false,
-    };
-  }
+  bool canUse(String feature) => true;
 
-  bool isLocked(String feature) => !canUse(feature);
+  bool isLocked(String feature) => false;
 
   // ── Free AI call quota ────────────────────────────────────────────────────
 
@@ -158,14 +145,15 @@ class PremiumService {
   };
 
   static const Map<String, String> premiumFeatures = {
-    'All 6 Culture Charts': 'Western, Vedic, Chinese, Mayan, Egyptian, Celtic',
-    'Unlimited AI Readings': 'Powered by Claude Opus & Gemini',
+    'All 7 Culture Charts': 'Western, Vedic, Chinese, Mayan, Egyptian, Celtic, Zoroastrian',
+    'Unlimited AI Readings': 'Powered by Claude & Gemini',
     'AI Astro Chat': 'Ask anything about your chart',
     'Personality Radar': 'Multi-tradition trait synthesis',
-    'Fixed Star Analysis': '16 Behenian stars at your birth',
+    'Fixed Star Analysis': '18 Behenian stars at your birth',
     'Daily AI Reading': 'Fresh insight every morning',
     'Share Card': 'Export your sky to share',
-    'Multiple Profiles': 'Charts for family & friends',
+    'Multiple Profiles': 'Paulien, Nurse, Bernd — all traditions',
+    'Local AI (AETHER)': 'On-device llama.cpp, no cloud needed',
     'Bring Your Own API Key': 'Use your Anthropic or Gemini key',
   };
 }
