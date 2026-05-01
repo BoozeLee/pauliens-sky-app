@@ -211,6 +211,10 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
                   ),
                 ]),
               ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
+                child: _AiStatusRow(premium: premium),
+              ),
               const SizedBox(height: 12),
               // Quick action tabs
               TabBar(
@@ -610,4 +614,77 @@ class _ChatBubble {
   final String role;
   final String text;
   const _ChatBubble({required this.role, required this.text});
+}
+
+// ── AI status indicator ────────────────────────────────────────────────────
+
+class _AiStatusRow extends StatelessWidget {
+  final PremiumService premium;
+  const _AiStatusRow({required this.premium});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _StatusDot(
+          label: 'AETHER',
+          tooltip: 'Local llama.cpp — download a GGUF model in Settings',
+          active: false, // runtime check via LlamaService would require ChangeNotifier
+          color: CosmicColors.neonCyan,
+        ),
+        const SizedBox(width: 8),
+        _StatusDot(
+          label: 'Claude',
+          tooltip: premium.hasAnthropicKey
+              ? 'Anthropic API key set ✓'
+              : 'Add Anthropic key in Settings',
+          active: premium.hasAnthropicKey,
+          color: CosmicColors.neonLavender,
+        ),
+        const SizedBox(width: 8),
+        _StatusDot(
+          label: 'Gemini',
+          tooltip: premium.hasGeminiKey
+              ? 'Google Gemini key set ✓'
+              : 'Add Gemini key in Settings',
+          active: premium.hasGeminiKey,
+          color: CosmicColors.neonPink,
+        ),
+      ],
+    );
+  }
+}
+
+class _StatusDot extends StatelessWidget {
+  final String label;
+  final String tooltip;
+  final bool active;
+  final Color color;
+  const _StatusDot(
+      {required this.label,
+      required this.tooltip,
+      required this.active,
+      required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Container(
+          width: 6, height: 6,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: active ? color : CosmicColors.textMuted,
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(label,
+            style: TextStyle(
+                fontSize: 10,
+                color: active ? color : CosmicColors.textMuted,
+                letterSpacing: 0.5)),
+      ]),
+    );
+  }
 }
