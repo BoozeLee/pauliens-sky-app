@@ -10,6 +10,7 @@ import '../cultures/celtic/celtic_module.dart';
 import '../cultures/zoroastrian/zoroastrian_module.dart';
 import 'ephemeris_service.dart';
 import 'fixed_stars.dart';
+import 'horizons_service.dart';
 
 class FullChart {
   final BirthContext context;
@@ -57,6 +58,7 @@ class PersonalityProfile {
 
 class ChartEngine {
   final EphemerisService _ephemeris = EphemerisService();
+  final _horizons = HorizonsService();
 
   final _modules = [
     WesternModule(),
@@ -68,13 +70,34 @@ class ChartEngine {
     ZoroastrianModule(),
   ];
 
-  FullChart compute(BirthContext ctx) {
-    final snapshot = _ephemeris.compute(ctx);
+  /// Sync compute using VSOP87 ephemeris (always works offline).
+  FullChart compute(BirthContext ctx) =>
+      _buildFull(ctx, _ephemeris.compute(ctx));
 
-    final charts = _modules
-        .map((m) => m.buildChart(ctx, snapshot))
-        .toList();
+  /// Async compute: tries JPL Horizons for sub-arcsecond positions,
+  /// falls back to VSOP87 on any network or parse failure.
+  Future<FullChart> computeAsync(BirthContext ctx) async {
+    final vsop = _ephemeris.compute(ctx);
+    final horizonsPositions = await _horizons.fetchPositions(ctx);
 
+    final AstroSnapshot snapshot;
+    if (horizonsPositions != null) {
+      snapshot = AstroSnapshot(
+        positions: horizonsPositions,
+        ascendant: vsop.ascendant,
+        midheaven: vsop.midheaven,
+        siderealOffset: vsop.siderealOffset,
+        lunarPhase: vsop.lunarPhase,
+      );
+    } else {
+      snapshot = vsop;
+    }
+
+    return _buildFull(ctx, snapshot);
+  }
+
+  FullChart _buildFull(BirthContext ctx, AstroSnapshot snapshot) {
+    final charts = _modules.map((m) => m.buildChart(ctx, snapshot)).toList();
     final sunLon = snapshot[Planet.sun]!.eclipticLongitude;
     final moonLon = snapshot[Planet.moon]!.eclipticLongitude;
     final prominentStars = [
@@ -82,15 +105,12 @@ class ChartEngine {
       ...FixedStars.nearPlanet(moonLon, orb: 2.0),
       ...FixedStars.nearPlanet(snapshot.ascendant, orb: 2.0),
     ];
-
-    final personality = _buildPersonality(charts, snapshot);
-
     return FullChart(
       context: ctx,
       snapshot: snapshot,
       charts: charts,
       prominentStars: prominentStars,
-      personality: personality,
+      personality: _buildPersonality(charts, snapshot),
     );
   }
 
