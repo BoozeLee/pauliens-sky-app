@@ -4,7 +4,7 @@ import '../models/birth_context.dart';
 import '../models/culture_chart.dart';
 import '../services/chart_engine.dart';
 
-enum AiProvider { anthropic, gemini }
+enum AiProvider { anthropic, gemini, openai }
 
 class AiMessage {
   final String role; // 'user' | 'assistant'
@@ -17,17 +17,21 @@ class AiService {
   static const _anthropicBase = 'https://api.anthropic.com/v1';
   static const _geminiBase =
       'https://generativelanguage.googleapis.com/v1beta';
+  static const _openAiBase    = 'https://api.openai.com/v1';
   static const _anthropicModel = 'claude-opus-4-7';
-  static const _geminiModel = 'gemini-2.0-flash';
+  static const _geminiModel    = 'gemini-2.0-flash';
+  static const _openAiModel    = 'gpt-4o-mini';
 
   final String? anthropicKey;
   final String? geminiKey;
+  final String? openAiKey;
 
-  const AiService({this.anthropicKey, this.geminiKey});
+  const AiService({this.anthropicKey, this.geminiKey, this.openAiKey});
 
   bool get hasAnthropic => anthropicKey != null && anthropicKey!.isNotEmpty;
-  bool get hasGemini => geminiKey != null && geminiKey!.isNotEmpty;
-  bool get hasAny => hasAnthropic || hasGemini;
+  bool get hasGemini    => geminiKey    != null && geminiKey!.isNotEmpty;
+  bool get hasOpenAi    => openAiKey    != null && openAiKey!.isNotEmpty;
+  bool get hasAny       => hasAnthropic || hasGemini || hasOpenAi;
 
   // ── System prompt shared by all astrology calls ──────────────────────────
 
@@ -131,9 +135,11 @@ Rules:
       AiMessage(role: 'user', content: prompt),
     ];
 
-    return provider == AiProvider.anthropic
-        ? _callAnthropic(system, messages)
-        : _callGemini(system, messages);
+    return switch (provider) {
+      AiProvider.anthropic => _callAnthropic(system, messages),
+      AiProvider.gemini    => _callGemini(system, messages),
+      AiProvider.openai    => _callOpenAi(system, messages),
+    };
   }
 
   Future<String> _callWithHistory(
@@ -145,9 +151,11 @@ Rules:
 
   AiProvider? _pickProvider(AiProvider? prefer) {
     if (prefer == AiProvider.anthropic && hasAnthropic) return AiProvider.anthropic;
-    if (prefer == AiProvider.gemini && hasGemini) return AiProvider.gemini;
+    if (prefer == AiProvider.gemini    && hasGemini)    return AiProvider.gemini;
+    if (prefer == AiProvider.openai    && hasOpenAi)    return AiProvider.openai;
     if (hasAnthropic) return AiProvider.anthropic;
-    if (hasGemini) return AiProvider.gemini;
+    if (hasGemini)    return AiProvider.gemini;
+    if (hasOpenAi)    return AiProvider.openai;
     return null;
   }
 
@@ -217,5 +225,36 @@ Rules:
     }
     final data = jsonDecode(response.body);
     return data['candidates'][0]['content']['parts'][0]['text'] as String;
+  }
+
+  // ── OpenAI GPT-4o-mini ────────────────────────────────────────────────────
+
+  Future<String> _callOpenAi(String system, List<AiMessage> messages) async {
+    final body = <Map<String, dynamic>>[
+      {'role': 'system', 'content': system},
+      ...messages.map((m) => m.toJson()),
+    ];
+
+    final response = await http.post(
+      Uri.parse('$_openAiBase/chat/completions'),
+      headers: {
+        'Authorization': 'Bearer $openAiKey',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'model': _openAiModel,
+        'messages': body,
+        'max_tokens': 1024,
+        'temperature': 0.85,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      final err = jsonDecode(response.body);
+      throw Exception(
+          'OpenAI error: ${err['error']?['message'] ?? response.statusCode}');
+    }
+    final data = jsonDecode(response.body);
+    return data['choices'][0]['message']['content'] as String;
   }
 }

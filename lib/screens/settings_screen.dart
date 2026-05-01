@@ -7,6 +7,7 @@ import '../services/premium_service.dart';
 import '../state/app_state.dart';
 import '../theme/cosmic_theme.dart';
 import '../widgets/sky_background.dart';
+import 'birth_input_screen.dart';
 import 'upgrade_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -23,12 +24,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _lonCtrl         = TextEditingController();
   final _anthropicCtrl   = TextEditingController();
   final _geminiCtrl      = TextEditingController();
+  final _openAiCtrl      = TextEditingController();
 
   DateTime _date   = DateTime(1996, 3, 13);
   TimeOfDay _time  = const TimeOfDay(hour: 11, minute: 0);
   bool _timeKnown  = false;
   bool _obscureAnthropic = true;
   bool _obscureGemini    = true;
+  bool _obscureOpenAi    = true;
   bool _saved = false;
 
   @override
@@ -47,6 +50,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final premium = PremiumService.instance;
     _anthropicCtrl.text = premium.anthropicApiKey;
     _geminiCtrl.text    = premium.geminiApiKey;
+    _openAiCtrl.text    = premium.openAiApiKey;
   }
 
   @override
@@ -54,6 +58,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _nameCtrl.dispose(); _cityCtrl.dispose();
     _latCtrl.dispose();  _lonCtrl.dispose();
     _anthropicCtrl.dispose(); _geminiCtrl.dispose();
+    _openAiCtrl.dispose();
     super.dispose();
   }
 
@@ -98,6 +103,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final premium = PremiumService.instance;
     await premium.setAnthropicKey(_anthropicCtrl.text);
     await premium.setGeminiKey(_geminiCtrl.text);
+    await premium.setOpenAiKey(_openAiCtrl.text);
 
     final lat = double.tryParse(_latCtrl.text) ?? 50.9311;
     final lon = double.tryParse(_lonCtrl.text) ?? 5.3378;
@@ -180,13 +186,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ]),
                     const SizedBox(height: 24),
 
+                    _SectionTitle('PROFILES'),
+                    const SizedBox(height: 12),
+                    _ProfileManager(appState: context.read<AppState>()),
+                    const SizedBox(height: 24),
+
                     _SectionTitle('AI API KEYS'),
                     const SizedBox(height: 8),
                     _apiKeyInfo(context),
                     const SizedBox(height: 12),
                     _apiKeyField(
                       controller: _anthropicCtrl,
-                      label: 'Anthropic API Key',
+                      label: 'Anthropic (Claude)',
                       hint: 'sk-ant-...',
                       obscure: _obscureAnthropic,
                       logo: '🤖',
@@ -200,7 +211,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(height: 10),
                     _apiKeyField(
                       controller: _geminiCtrl,
-                      label: 'Google Gemini API Key',
+                      label: 'Google Gemini',
                       hint: 'AIza...',
                       obscure: _obscureGemini,
                       logo: '✨',
@@ -209,6 +220,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onClear: () async {
                         await PremiumService.instance.clearGeminiKey();
                         setState(() => _geminiCtrl.clear());
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    _apiKeyField(
+                      controller: _openAiCtrl,
+                      label: 'OpenAI (GPT-4o-mini)',
+                      hint: 'sk-...',
+                      obscure: _obscureOpenAi,
+                      logo: '⚡',
+                      onToggle: () =>
+                          setState(() => _obscureOpenAi = !_obscureOpenAi),
+                      onClear: () async {
+                        await PremiumService.instance.clearOpenAiKey();
+                        setState(() => _openAiCtrl.clear());
                       },
                     ),
                     const SizedBox(height: 12),
@@ -414,6 +439,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     const SizedBox(width: 8),
     _keyBadge('Gemini', premium.hasGeminiKey),
     const SizedBox(width: 8),
+    _keyBadge('OpenAI', premium.hasOpenAiKey),
+    const SizedBox(width: 8),
     if (premium.isPremium)
       Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -494,6 +521,177 @@ class _SettingsScreenState extends State<SettingsScreen> {
     ]),
   );
 }
+
+// ── Profile manager ───────────────────────────────────────────────────────────
+
+class _ProfileManager extends StatelessWidget {
+  final AppState appState;
+  const _ProfileManager({required this.appState});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: appState,
+      builder: (context, _) {
+        final profiles = appState.profiles;
+        final activeId = appState.activeProfile.id;
+        return Column(
+          children: [
+            ...profiles.map((p) => _ProfileTile(
+              profile: p,
+              isActive: p.id == activeId,
+              onSwitch: () => appState.switchProfile(p.id),
+              onEdit: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => BirthInputScreen(
+                  initial: p.birthContext,
+                  existingProfileId: p.id,
+                ),
+              )),
+              onDelete: profiles.length > 1
+                  ? () => _confirmDelete(context, p.name, () =>
+                      appState.removeProfile(p.id))
+                  : null,
+            )),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.add, size: 16,
+                    color: CosmicColors.neonCyan),
+                label: const Text('Add New Profile',
+                    style: TextStyle(color: CosmicColors.neonCyan)),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(
+                      color: CosmicColors.neonCyan.withValues(alpha: 0.4)),
+                ),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (_) => const BirthInputScreen()),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _confirmDelete(BuildContext context, String name, VoidCallback onConfirm) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: CosmicColors.card,
+        title: Text('Remove $name?',
+            style: const TextStyle(color: CosmicColors.textPrimary)),
+        content: Text('This will delete $name\'s profile permanently.',
+            style: const TextStyle(color: CosmicColors.textSecondary)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel',
+                style: TextStyle(color: CosmicColors.textMuted)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              onConfirm();
+            },
+            child: const Text('Remove',
+                style: TextStyle(color: CosmicColors.neonPink)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileTile extends StatelessWidget {
+  final Profile profile;
+  final bool isActive;
+  final VoidCallback onSwitch;
+  final VoidCallback onEdit;
+  final VoidCallback? onDelete;
+  const _ProfileTile({
+    required this.profile,
+    required this.isActive,
+    required this.onSwitch,
+    required this.onEdit,
+    this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isActive ? CosmicColors.neonLavender : CosmicColors.textMuted;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: isActive
+            ? CosmicColors.neonLavender.withValues(alpha: 0.08)
+            : CosmicColors.card,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+            color: isActive
+                ? CosmicColors.neonLavender.withValues(alpha: 0.4)
+                : CosmicColors.divider),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+        leading: CircleAvatar(
+          radius: 18,
+          backgroundColor: color.withValues(alpha: 0.15),
+          child: Text(
+            profile.name.isNotEmpty ? profile.name[0].toUpperCase() : '?',
+            style: TextStyle(color: color, fontSize: 14,
+                fontWeight: FontWeight.w600),
+          ),
+        ),
+        title: Text(profile.name,
+            style: TextStyle(color: color, fontSize: 14,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.normal)),
+        subtitle: Text(
+          _dob(profile.birthContext),
+          style: const TextStyle(color: CosmicColors.textMuted, fontSize: 11),
+        ),
+        trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+          if (isActive)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+              decoration: BoxDecoration(
+                color: CosmicColors.neonLavender.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text('ACTIVE',
+                  style: TextStyle(color: CosmicColors.neonLavender,
+                      fontSize: 9, letterSpacing: 1)),
+            ),
+          IconButton(
+            icon: const Icon(Icons.edit_outlined, size: 16,
+                color: CosmicColors.textMuted),
+            onPressed: onEdit,
+            tooltip: 'Edit',
+          ),
+          if (onDelete != null)
+            IconButton(
+              icon: const Icon(Icons.delete_outline, size: 16,
+                  color: CosmicColors.textMuted),
+              onPressed: onDelete,
+              tooltip: 'Remove',
+            ),
+        ]),
+        onTap: isActive ? null : onSwitch,
+      ),
+    );
+  }
+
+  String _dob(BirthContext ctx) {
+    final d = ctx.utcTime;
+    return '${d.day.toString().padLeft(2,'0')}/'
+        '${d.month.toString().padLeft(2,'0')}/${d.year}'
+        '  ${ctx.locationName ?? ''}';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _SectionTitle extends StatelessWidget {
   final String text;

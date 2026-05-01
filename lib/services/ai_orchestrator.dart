@@ -4,7 +4,8 @@
 ///   1. Local AETHER model (llama.cpp) — if loaded
 ///   2. Anthropic Claude (if key present)
 ///   3. Google Gemini (if key present)
-///   4. Error state (no AI available)
+///   4. OpenAI GPT-4o-mini (if key present)
+///   5. Error state (no AI available)
 
 import 'package:flutter/foundation.dart';
 import '../services/ai_service.dart';
@@ -16,7 +17,7 @@ import '../services/premium_service.dart';
 import '../services/chart_engine.dart';
 import '../models/culture_chart.dart';
 
-enum AiProvider { local, claude, gemini, none }
+enum AiProvider { local, claude, gemini, openai, none }
 
 class AiOrchestrator extends ChangeNotifier {
   static final AiOrchestrator instance = AiOrchestrator._();
@@ -29,12 +30,14 @@ class AiOrchestrator extends ChangeNotifier {
   bool get hasLocal  => LlamaService.instance.isModelLoaded;
   bool get hasClaude => PremiumService.instance.hasAnthropicKey;
   bool get hasGemini => PremiumService.instance.hasGeminiKey;
-  bool get hasAny    => hasLocal || hasClaude || hasGemini;
+  bool get hasOpenAi => PremiumService.instance.hasOpenAiKey;
+  bool get hasAny    => hasLocal || hasClaude || hasGemini || hasOpenAi;
 
   String get providerLabel => switch (_active) {
     AiProvider.local  => '⬡ AETHER (local)',
     AiProvider.claude => '✦ Claude',
     AiProvider.gemini => '✨ Gemini',
+    AiProvider.openai => '⚡ GPT-4o-mini',
     AiProvider.none   => '○ No AI',
   };
 
@@ -42,6 +45,7 @@ class AiOrchestrator extends ChangeNotifier {
     AiProvider.local  => 'AETHER',
     AiProvider.claude => 'Claude',
     AiProvider.gemini => 'Gemini',
+    AiProvider.openai => 'OpenAI',
     AiProvider.none   => 'None',
   };
 
@@ -77,8 +81,9 @@ class AiOrchestrator extends ChangeNotifier {
   }
 
   AiProvider _bestCloudProvider() {
-    if (hasClaude) return AiProvider.claude;
-    if (hasGemini) return AiProvider.gemini;
+    if (hasClaude)  return AiProvider.claude;
+    if (hasGemini)  return AiProvider.gemini;
+    if (hasOpenAi)  return AiProvider.openai;
     return AiProvider.none;
   }
 
@@ -108,12 +113,9 @@ class AiOrchestrator extends ChangeNotifier {
 
       case AiProvider.claude:
       case AiProvider.gemini:
+      case AiProvider.openai:
         final svc = PremiumService.instance.aiService;
-        final all = [
-          ...history,
-          AiMessage(role: 'user', content: userMessage),
-        ];
-        final response = await svc.chat(all, chart);
+        final response = await svc.chat(userMessage, chart, history);
         // Emit word-by-word for consistent streaming feel
         final words = response.split(' ');
         for (int i = 0; i < words.length; i++) {
@@ -201,6 +203,7 @@ class AiOrchestrator extends ChangeNotifier {
 
       case AiProvider.claude:
       case AiProvider.gemini:
+      case AiProvider.openai:
         final svc = PremiumService.instance.aiService;
         if (culture != null) {
           return svc.cultureDeepDive(chart, culture.displayName);

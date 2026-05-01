@@ -90,7 +90,8 @@ lib/
 | IERS Bulletin B | ✅ script | scripts/fetch_apis.py --iers | assets/data/delta_t.json |
 | Anthropic Claude | ✅ keyed | ai_service.dart | None (live) |
 | Google Gemini | ✅ keyed | ai_service.dart | None (live) |
-| llama.cpp (AETHER) | ⚠️ needs .so | llama_service.dart | On-device GGUF |
+| OpenAI GPT-4o-mini | ✅ keyed | ai_service.dart | None (live) |
+| llama.cpp (AETHER) | ✅ built | llama_service.dart | On-device GGUF |
 
 ---
 
@@ -100,11 +101,12 @@ lib/
 1. **AETHER local** — if `libaether_llm.so` compiled + GGUF model downloaded
 2. **Claude** — if Anthropic API key in settings
 3. **Gemini** — if Google API key in settings
-4. **None** — error state, message shown
+4. **OpenAI GPT-4o-mini** — if OpenAI API key in settings
+5. **None** — error state, message shown
 
 ### Status
-- **Cloud AI (Claude/Gemini)**: ✅ fully working — enter key in Settings → instant AI chat
-- **Local AI (AETHER)**: ⚠️ needs build step — `scripts/build_llama.sh` compiles the .so, then use Model Manager to download a GGUF (recommended: Mistral-7B-v0.1.Q4_K_M.gguf ~4GB)
+- **Cloud AI (Claude/Gemini/OpenAI)**: ✅ fully working — enter key in Settings → instant AI chat
+- **Local AI (AETHER)**: ✅ `libaether_llm.so` built — use Model Manager to download GGUF (recommended: Mistral-7B-v0.1.Q4_K_M.gguf ~4GB)
 
 ### Penta-Layer Prompt (both in-app and CLI)
 1. TF-IDF RAG over 40+ classical astrology passages

@@ -23,6 +23,7 @@ class PremiumService {
   static const _tierKey       = 'premium_tier';
   static const _anthropicKey  = 'anthropic_api_key';
   static const _geminiKey     = 'gemini_api_key';
+  static const _openAiKey     = 'openai_api_key';
   static const _aiCallsToday  = 'ai_calls_today';
   static const _aiCallsDate   = 'ai_calls_date';
   static const _freeAiLimit   = 999; // V2: all features freemium
@@ -51,7 +52,7 @@ class PremiumService {
 
   // Migrate any keys previously stored in SharedPreferences to secure storage
   Future<void> _migrateKeysToSecureStorage() async {
-    for (final k in [_anthropicKey, _geminiKey]) {
+    for (final k in [_anthropicKey, _geminiKey, _openAiKey]) {
       final legacyVal = _prefs.getString(k);
       if (legacyVal != null && legacyVal.isNotEmpty) {
         await _secure.write(key: k, value: legacyVal);
@@ -75,21 +76,26 @@ class PremiumService {
   // Sync accessors (fast for UI display — empty until async load completes)
   String _cachedAnthropicKey = '';
   String _cachedGeminiKey    = '';
+  String _cachedOpenAiKey    = '';
 
   String get anthropicApiKey => _cachedAnthropicKey;
   String get geminiApiKey    => _cachedGeminiKey;
+  String get openAiApiKey    => _cachedOpenAiKey;
   bool   get hasAnthropicKey => _cachedAnthropicKey.isNotEmpty;
   bool   get hasGeminiKey    => _cachedGeminiKey.isNotEmpty;
-  bool   get hasAnyKey       => hasAnthropicKey || hasGeminiKey;
+  bool   get hasOpenAiKey    => _cachedOpenAiKey.isNotEmpty;
+  bool   get hasAnyKey       => hasAnthropicKey || hasGeminiKey || hasOpenAiKey;
 
   // Call once after init() to populate the in-memory cache
   Future<void> loadApiKeys() async {
     if (_useSecure) {
       _cachedAnthropicKey = await _secure.read(key: _anthropicKey) ?? '';
       _cachedGeminiKey    = await _secure.read(key: _geminiKey)    ?? '';
+      _cachedOpenAiKey    = await _secure.read(key: _openAiKey)    ?? '';
     } else {
       _cachedAnthropicKey = _prefs.getString(_anthropicKey) ?? '';
       _cachedGeminiKey    = _prefs.getString(_geminiKey)    ?? '';
+      _cachedOpenAiKey    = _prefs.getString(_openAiKey)    ?? '';
     }
   }
 
@@ -129,9 +135,28 @@ class PremiumService {
     }
   }
 
+  Future<void> setOpenAiKey(String key) async {
+    _cachedOpenAiKey = key.trim();
+    if (_useSecure) {
+      await _secure.write(key: _openAiKey, value: key.trim());
+    } else {
+      await _prefs.setString(_openAiKey, key.trim());
+    }
+  }
+
+  Future<void> clearOpenAiKey() async {
+    _cachedOpenAiKey = '';
+    if (_useSecure) {
+      await _secure.delete(key: _openAiKey);
+    } else {
+      await _prefs.remove(_openAiKey);
+    }
+  }
+
   AiService get aiService => AiService(
     anthropicKey: hasAnthropicKey ? anthropicApiKey : null,
     geminiKey:    hasGeminiKey    ? geminiApiKey    : null,
+    openAiKey:    hasOpenAiKey    ? openAiApiKey    : null,
   );
 
   // ── Feature gates — V2: everything unlocked ───────────────────────────────

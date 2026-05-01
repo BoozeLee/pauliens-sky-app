@@ -207,6 +207,7 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
                     current: _provider,
                     hasClaude: premium.hasAnthropicKey,
                     hasGemini: premium.hasGeminiKey,
+                    hasOpenAi: premium.hasOpenAiKey,
                     onChanged: (p) => setState(() => _provider = p),
                   ),
                 ]),
@@ -276,12 +277,14 @@ class _ProviderToggle extends StatelessWidget {
   final AiProvider current;
   final bool hasClaude;
   final bool hasGemini;
+  final bool hasOpenAi;
   final ValueChanged<AiProvider> onChanged;
 
   const _ProviderToggle({
     required this.current,
     required this.hasClaude,
     required this.hasGemini,
+    required this.hasOpenAi,
     required this.onChanged,
   });
 
@@ -297,6 +300,7 @@ class _ProviderToggle extends StatelessWidget {
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         _chip('Claude', AiProvider.anthropic, hasClaude, '🤖'),
         _chip('Gemini', AiProvider.gemini, hasGemini, '✨'),
+        _chip('GPT', AiProvider.openai, hasOpenAi, '⚡'),
       ]),
     );
   }
@@ -649,6 +653,15 @@ class _AiStatusRow extends StatelessWidget {
               : 'Add Gemini key in Settings',
           active: premium.hasGeminiKey,
           color: CosmicColors.neonPink,
+        ),
+        const SizedBox(width: 8),
+        _StatusDot(
+          label: 'GPT',
+          tooltip: premium.hasOpenAiKey
+              ? 'OpenAI key set ✓'
+              : 'Add OpenAI key in Settings',
+          active: premium.hasOpenAiKey,
+          color: CosmicColors.neonGreen,
         ),
       ],
     );
