@@ -134,26 +134,43 @@
 ### T10 — Omarchy Desktop Entry ✅
 - [x] `~/.local/share/applications/pauliens_sky.desktop` created
 
+## ✅ Recently Completed (Sprint 3)
+
+### T6b — FixedStars from HYG JSON ✅
+- [x] `FixedStar._fromHyg()` factory — loads name/lon/mag/spect from JSON
+- [x] `FixedStars.loadCatalog()` — async JSON loader, merges Behenian lore by name
+- [x] `_catalog` replaces hardcoded 18 stars with 518-star HYG catalog at startup
+- [x] Behenian stars get precise HYG longitudes + keep all lore/herb/stone
+- [x] Called from `main()` alongside `UiSchema.load()`
+
+### T16 — AETHER .so Build ✅
+- [x] Updated `aether_llm.cpp` for new llama.cpp API:
+      `llama_model_get_vocab()`, `llama_memory_clear(llama_get_memory(ctx))`,
+      `llama_vocab_eos(vocab)`, `llama_vocab_n_tokens(vocab)`,
+      `llama_token_to_piece(vocab, ...)`
+- [x] `libaether_llm.so` (27KB) built at `linux/libs/libaether_llm.so`
+- [x] Fixed `build_llama.sh` same-file cp false-failure
+
+### T17 — Synastry Engine ✅
+- [x] `lib/models/synastry_chart.dart` — `AspectType` (5 aspects + orbs + harmony scores),
+      `SynastryAspect` (planet pair + type + orb + strength),
+      `SynastryChart` (aspects list + weighted compatibility score 0–1)
+- [x] `lib/services/synastry_engine.dart` — computes all planet × planet aspects
+      across two `FullChart`s, includes ASC, sorts by strength
+- [x] `_SynastrySection` widget in `ProfileComparisonScreen`:
+      score bar with color/label, harmonious aspects (≤8), dynamic tensions (≤5)
+
 ## 🔨 Next Sprint
 
----
-
-### Remaining T6 work
-- [ ] Update `FixedStars` service to load from `assets/data/bright_stars.json` (currently hardcoded 18 stars)
-- [ ] Expand chart display to top 60+ brightest stars
-
-## 📋 Backlog
-
-- [ ] FixedStars service: load from assets/data/bright_stars.json (not hardcoded 18 stars)
-- [ ] Synastry / compatibility engine between two profiles
 - [ ] Transit calculator — current sky vs natal chart overlay
 - [ ] Android APK build + distribution
 - [ ] Push notification: daily reading at sunrise
 - [ ] Offline mode: bundle DE440 ephemeris as binary asset
 - [ ] Prokerala API integration (Indian charts, 300/day free tier)
-- [ ] AETHER: download and compile libaether_llm.so for Linux + Android
 - [ ] Model manager: download Mistral-7B-v0.1.Q4_K_M.gguf (recommended model)
 - [ ] Profile: add birth notes / metadata field (parents, significant events)
+
+## 📋 Backlog
 
 ### Astrology APIs to integrate
 | API | URL | Auth | What it gives |
@@ -170,8 +187,8 @@
 - [ ] Babylonian astrology module (MUL.APIN star catalogue, cuneiform signs)
 - [ ] House system selector (Placidus, Koch, Whole Sign, Equal)
 - [ ] Aspect table (conjunctions, oppositions, trines, squares, sextiles)
-- [ ] Transit calculator — current sky vs natal chart
-- [ ] Synastry / compatibility between two profiles
+- [x] Transit calculator — current sky vs natal chart (Next Sprint)
+- [x] Synastry / compatibility between two profiles ✅ T17
 - [ ] Chart export as PDF
 - [ ] Notification — daily reading push at sunrise
 - [ ] Widget (Android home screen glanceable summary)

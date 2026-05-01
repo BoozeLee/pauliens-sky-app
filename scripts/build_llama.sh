@@ -47,7 +47,10 @@ if [ -z "$SO" ]; then
 fi
 
 if [ -n "$SO" ]; then
-    cp "$SO" "$OUT_DIR/libaether_llm.so"
+    # CMake may have already placed the .so directly in OUT_DIR
+    if [ "$SO" != "$OUT_DIR/libaether_llm.so" ]; then
+        cp "$SO" "$OUT_DIR/libaether_llm.so"
+    fi
     echo "✓ Built: $OUT_DIR/libaether_llm.so"
     ls -lh "$OUT_DIR/libaether_llm.so"
 else

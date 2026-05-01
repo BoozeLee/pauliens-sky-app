@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/culture_chart.dart';
+import '../models/synastry_chart.dart';
 import '../services/chart_engine.dart';
+import '../services/synastry_engine.dart';
 import '../state/app_state.dart';
 import '../theme/cosmic_theme.dart';
 import '../widgets/sky_background.dart';
@@ -18,6 +20,7 @@ class _ProfileComparisonScreenState extends State<ProfileComparisonScreen> {
   late String _idA;
   late String _idB;
   final _engine = ChartEngine();
+  final _synastry = SynastryEngine();
 
   @override
   void initState() {
@@ -71,6 +74,12 @@ class _ProfileComparisonScreenState extends State<ProfileComparisonScreen> {
                     _RadarCompare(chartA: chartA, chartB: chartB),
                     const SizedBox(height: 24),
                     _TraditionsCompare(chartA: chartA, chartB: chartB),
+                    const SizedBox(height: 24),
+                    _SynastrySection(
+                      synastry: _synastry.compute(chartA, chartB),
+                      colorA: CosmicColors.neonLavender,
+                      colorB: CosmicColors.neonCyan,
+                    ),
                     const SizedBox(height: 40),
                   ]),
                 ),
@@ -508,6 +517,162 @@ class _TraditionRow extends StatelessWidget {
               textAlign: TextAlign.center,
               style: const TextStyle(
                   color: CosmicColors.neonCyan, fontSize: 12)),
+        ),
+      ]),
+    );
+  }
+}
+
+// ── Synastry section ─────────────────────────────────────────────────────────
+
+class _SynastrySection extends StatelessWidget {
+  final SynastryChart synastry;
+  final Color colorA, colorB;
+  const _SynastrySection(
+      {required this.synastry, required this.colorA, required this.colorB});
+
+  @override
+  Widget build(BuildContext context) {
+    final pct = (synastry.score * 100).round();
+    final harmonic = synastry.harmonious.take(8).toList();
+    final tense = synastry.challenging.take(5).toList();
+
+    return _Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _CardTitle('♃ Synastry — Celestial Compatibility'),
+          const SizedBox(height: 14),
+          // Score bar
+          Row(children: [
+            Text('$pct%',
+                style: TextStyle(
+                    color: _scoreColor(synastry.score),
+                    fontSize: 28,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -1)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: synastry.score,
+                      minHeight: 8,
+                      backgroundColor: CosmicColors.card,
+                      valueColor: AlwaysStoppedAnimation(
+                          _scoreColor(synastry.score)),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(_scoreLabel(synastry.score),
+                      style: TextStyle(
+                          color: _scoreColor(synastry.score),
+                          fontSize: 11,
+                          letterSpacing: 1)),
+                ],
+              ),
+            ),
+          ]),
+          if (harmonic.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _SubLabel('HARMONIOUS ASPECTS'),
+            const SizedBox(height: 8),
+            ...harmonic.map((a) => _AspectRow(a, colorA, colorB,
+                color: CosmicColors.neonGreen)),
+          ],
+          if (tense.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _SubLabel('DYNAMIC TENSIONS'),
+            const SizedBox(height: 8),
+            ...tense.map((a) => _AspectRow(a, colorA, colorB,
+                color: CosmicColors.neonPink)),
+          ],
+          if (synastry.aspects.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                'No exact aspects found within standard orbs.',
+                style: Theme.of(context)
+                    .textTheme.bodyMedium
+                    ?.copyWith(color: CosmicColors.textMuted),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Color _scoreColor(double score) {
+    if (score >= 0.75) return CosmicColors.neonGreen;
+    if (score >= 0.55) return CosmicColors.neonYellow;
+    if (score >= 0.4) return CosmicColors.neonCyan;
+    return CosmicColors.neonPink;
+  }
+
+  String _scoreLabel(double score) {
+    if (score >= 0.80) return 'HIGHLY RESONANT';
+    if (score >= 0.65) return 'STRONGLY COMPATIBLE';
+    if (score >= 0.50) return 'HARMONIOUS';
+    if (score >= 0.38) return 'DYNAMIC';
+    return 'TRANSFORMATIVE TENSION';
+  }
+}
+
+class _AspectRow extends StatelessWidget {
+  final SynastryAspect aspect;
+  final Color colorA, colorB, color;
+  const _AspectRow(this.aspect, this.colorA, this.colorB,
+      {required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(children: [
+        // Aspect symbol
+        Container(
+          width: 28,
+          alignment: Alignment.center,
+          child: Text(aspect.type.symbol,
+              style: TextStyle(color: color, fontSize: 14)),
+        ),
+        const SizedBox(width: 6),
+        // Person A planet
+        Text(aspect.pointLabelA,
+            style: TextStyle(color: colorA, fontSize: 12,
+                fontWeight: FontWeight.w500)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Text(aspect.type.label,
+              style: const TextStyle(
+                  color: CosmicColors.textMuted, fontSize: 10)),
+        ),
+        // Person B planet
+        Text(aspect.pointLabelB,
+            style: TextStyle(color: colorB, fontSize: 12,
+                fontWeight: FontWeight.w500)),
+        const Spacer(),
+        // Orb
+        Text('${aspect.orb.toStringAsFixed(1)}°',
+            style: const TextStyle(
+                color: CosmicColors.textMuted, fontSize: 11)),
+        // Strength bar
+        const SizedBox(width: 6),
+        SizedBox(
+          width: 36,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: LinearProgressIndicator(
+              value: aspect.strength,
+              minHeight: 4,
+              backgroundColor: CosmicColors.divider,
+              valueColor: AlwaysStoppedAnimation(
+                  color.withValues(alpha: 0.7)),
+            ),
+          ),
         ),
       ]),
     );

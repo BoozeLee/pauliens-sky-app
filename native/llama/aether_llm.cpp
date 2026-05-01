@@ -84,14 +84,14 @@ void aether_free(AetherContext* ac) {
 
 // ── Tokenization helpers ────────────────────────────────────────────────────
 
-static std::vector<llama_token> tokenize(llama_model* model,
+static std::vector<llama_token> tokenize(const llama_vocab* vocab,
                                           const std::string& text,
                                           bool add_bos) {
-    const int n = -llama_tokenize(model,
+    const int n = -llama_tokenize(vocab,
                                    text.c_str(), (int)text.size(),
                                    nullptr, 0, add_bos, true);
     std::vector<llama_token> toks(n);
-    llama_tokenize(model, text.c_str(), (int)text.size(),
+    llama_tokenize(vocab, text.c_str(), (int)text.size(),
                    toks.data(), (int)toks.size(), add_bos, true);
     return toks;
 }
@@ -118,9 +118,10 @@ static std::string _infer_impl(AetherContext* ac,
     llama_sampler_chain_add(ac->sampler,
         llama_sampler_init_greedy());
 
-    llama_kv_cache_clear(ac->ctx);
+    llama_memory_clear(llama_get_memory(ac->ctx), true);
 
-    auto prompt_tokens = tokenize(ac->model, prompt, true);
+    const llama_vocab* vocab = llama_model_get_vocab(ac->model);
+    auto prompt_tokens = tokenize(vocab, prompt, true);
     if ((int)prompt_tokens.size() >= ac->n_ctx) {
         // Truncate to fit context
         prompt_tokens.erase(prompt_tokens.begin(),
@@ -133,9 +134,9 @@ static std::string _infer_impl(AetherContext* ac,
         prompt_tokens.data(), (int)prompt_tokens.size());
     if (llama_decode(ac->ctx, batch)) return "";
 
-    const int    max_gen = (max_tokens > 0) ? max_tokens : 512;
-    const int    n_vocab = llama_vocab_n_tokens(ac->model);
-    const llama_token eos = llama_vocab_eos(ac->model);
+    const int         max_gen = (max_tokens > 0) ? max_tokens : 512;
+    const llama_token eos     = llama_vocab_eos(vocab);
+    (void)llama_vocab_n_tokens(vocab); // available if needed for future sampling
 
     std::string output;
     auto t0 = std::chrono::high_resolution_clock::now();
@@ -146,7 +147,7 @@ static std::string _infer_impl(AetherContext* ac,
         if (tok == eos) break;
 
         char buf[256] = {};
-        int len = llama_token_to_piece(ac->model, tok, buf, sizeof(buf)-1, 0, true);
+        int len = llama_token_to_piece(vocab, tok, buf, sizeof(buf)-1, 0, true);
         if (len < 0) break;
         buf[len] = '\0';
 

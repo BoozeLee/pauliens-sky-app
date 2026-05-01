@@ -1,7 +1,7 @@
 # Paulien's Sky — Integration Report v2.0.0
-**Generated:** 2026-05-01  
+**Generated:** 2026-05-01 (updated Sprint 3)
 **Repo:** https://github.com/BoozeLee/pauliens-sky-app  
-**Branch:** master (tagged v2.0.0)  
+**Branch:** master (tagged v2.0.0, Sprint 3 in progress)  
 **Stack:** Flutter 3.x / Dart, Linux + Android targets, uv Python scripts
 
 ---
