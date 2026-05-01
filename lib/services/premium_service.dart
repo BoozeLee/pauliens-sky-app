@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'ai_service.dart';
 
 enum PremiumTier { free, premium }
@@ -29,12 +32,32 @@ class PremiumService {
 
   final SharedPreferences _prefs;
 
+  // Secure storage: Android Keystore / iOS Keychain on mobile; SharedPrefs on Linux/desktop
+  static bool get _useSecure =>
+      !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+
+  static const _secure = FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
+
   PremiumService._(this._prefs);
 
   static Future<PremiumService> init() async {
     final prefs = await SharedPreferences.getInstance();
     _instance = PremiumService._(prefs);
+    if (_useSecure) await _instance!._migrateKeysToSecureStorage();
     return _instance!;
+  }
+
+  // Migrate any keys previously stored in SharedPreferences to secure storage
+  Future<void> _migrateKeysToSecureStorage() async {
+    for (final k in [_anthropicKey, _geminiKey]) {
+      final legacyVal = _prefs.getString(k);
+      if (legacyVal != null && legacyVal.isNotEmpty) {
+        await _secure.write(key: k, value: legacyVal);
+        await _prefs.remove(k);
+      }
+    }
   }
 
   // ── Tier — V2: all features freemium ─────────────────────────────────────
@@ -47,20 +70,64 @@ class PremiumService {
     await _prefs.setString(_tierKey, value ? 'premium' : 'free');
   }
 
-  // ── API Keys ──────────────────────────────────────────────────────────────
+  // ── API Keys — stored in OS secure enclave (Keystore/Keychain) ──────────────
 
-  String get anthropicApiKey => _prefs.getString(_anthropicKey) ?? '';
-  String get geminiApiKey    => _prefs.getString(_geminiKey) ?? '';
-  bool   get hasAnthropicKey => anthropicApiKey.isNotEmpty;
-  bool   get hasGeminiKey    => geminiApiKey.isNotEmpty;
+  // Sync accessors (fast for UI display — empty until async load completes)
+  String _cachedAnthropicKey = '';
+  String _cachedGeminiKey    = '';
+
+  String get anthropicApiKey => _cachedAnthropicKey;
+  String get geminiApiKey    => _cachedGeminiKey;
+  bool   get hasAnthropicKey => _cachedAnthropicKey.isNotEmpty;
+  bool   get hasGeminiKey    => _cachedGeminiKey.isNotEmpty;
   bool   get hasAnyKey       => hasAnthropicKey || hasGeminiKey;
 
-  Future<void> setAnthropicKey(String key) async =>
-      _prefs.setString(_anthropicKey, key.trim());
-  Future<void> setGeminiKey(String key) async =>
-      _prefs.setString(_geminiKey, key.trim());
-  Future<void> clearAnthropicKey() async => _prefs.remove(_anthropicKey);
-  Future<void> clearGeminiKey() async    => _prefs.remove(_geminiKey);
+  // Call once after init() to populate the in-memory cache
+  Future<void> loadApiKeys() async {
+    if (_useSecure) {
+      _cachedAnthropicKey = await _secure.read(key: _anthropicKey) ?? '';
+      _cachedGeminiKey    = await _secure.read(key: _geminiKey)    ?? '';
+    } else {
+      _cachedAnthropicKey = _prefs.getString(_anthropicKey) ?? '';
+      _cachedGeminiKey    = _prefs.getString(_geminiKey)    ?? '';
+    }
+  }
+
+  Future<void> setAnthropicKey(String key) async {
+    _cachedAnthropicKey = key.trim();
+    if (_useSecure) {
+      await _secure.write(key: _anthropicKey, value: key.trim());
+    } else {
+      await _prefs.setString(_anthropicKey, key.trim());
+    }
+  }
+
+  Future<void> setGeminiKey(String key) async {
+    _cachedGeminiKey = key.trim();
+    if (_useSecure) {
+      await _secure.write(key: _geminiKey, value: key.trim());
+    } else {
+      await _prefs.setString(_geminiKey, key.trim());
+    }
+  }
+
+  Future<void> clearAnthropicKey() async {
+    _cachedAnthropicKey = '';
+    if (_useSecure) {
+      await _secure.delete(key: _anthropicKey);
+    } else {
+      await _prefs.remove(_anthropicKey);
+    }
+  }
+
+  Future<void> clearGeminiKey() async {
+    _cachedGeminiKey = '';
+    if (_useSecure) {
+      await _secure.delete(key: _geminiKey);
+    } else {
+      await _prefs.remove(_geminiKey);
+    }
+  }
 
   AiService get aiService => AiService(
     anthropicKey: hasAnthropicKey ? anthropicApiKey : null,

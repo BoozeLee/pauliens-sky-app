@@ -11,6 +11,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await PremiumService.init();
+  await PremiumService.instance.loadApiKeys();
   await LocaleService.init();
   await UiSchema.load();
 
