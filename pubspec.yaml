@@ -40,7 +40,7 @@ dependencies:
   dart_iztro: ^2.0.0
 
   # Geocoding (lat/lon from city name)
-  geocoding: ^3.0.0
+  geocoding: ^4.0.0
 
   # Timezone
   timezone: ^0.9.4
