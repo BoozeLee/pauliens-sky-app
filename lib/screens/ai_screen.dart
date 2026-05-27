@@ -555,21 +555,24 @@ class _MessageList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scrollbar(
-      controller: ctrl,
-      thumbVisibility: true,
-      trackVisibility: true,
-      interactive: true,
-      thickness: 8.0,
-      child: ListView.builder(
+    return Container(
+      color: Colors.transparent, // Explicit background to catch mouse events
+      child: Scrollbar(
         controller: ctrl,
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        itemCount: messages.length + (thinking ? 1 : 0),
-        itemBuilder: (_, i) {
-          if (i == messages.length) return const _ThinkingBubble();
-          return _BubbleWidget(bubble: messages[i]);
-        },
+        thumbVisibility: true,
+        trackVisibility: true,
+        interactive: true,
+        thickness: 12.0, // Thicker to ensure hit area
+        child: ListView.builder(
+          controller: ctrl,
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          itemCount: messages.length + (thinking ? 1 : 0),
+          itemBuilder: (_, i) {
+            if (i == messages.length) return const _ThinkingBubble();
+            return _BubbleWidget(bubble: messages[i]);
+          },
+        ),
       ),
     );
   }
