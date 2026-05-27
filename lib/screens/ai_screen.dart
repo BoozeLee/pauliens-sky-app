@@ -8,6 +8,25 @@ import '../theme/cosmic_theme.dart';
 import '../widgets/sky_background.dart';
 import 'art_generating_screen.dart';
 
+class CosmicScrollbar extends StatelessWidget {
+  final Widget child;
+  final ScrollController controller;
+
+  const CosmicScrollbar({required this.child, required this.controller, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scrollbar(
+      controller: controller,
+      thumbVisibility: true,
+      trackVisibility: true,
+      interactive: true,
+      thickness: 12.0,
+      child: child,
+    );
+  }
+}
+
 class AiScreen extends StatefulWidget {
   const AiScreen({super.key});
 
@@ -28,7 +47,7 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 3, vsync: this);
+    _tabs = TabController(length: 4, vsync: this);
     _provider = PremiumService.instance.hasAnthropicKey
         ? AiProvider.anthropic
         : AiProvider.openai;
@@ -41,6 +60,7 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
     _scrollCtrl1.dispose();
     _scrollCtrl2.dispose();
     _scrollCtrl3.dispose();
+    // No _scrollCtrl4 needed for Art tab yet
     super.dispose();
   }
 
@@ -299,6 +319,7 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
                   Tab(text: 'Chart Reading'),
                   Tab(text: 'Daily'),
                   Tab(text: 'Chat'),
+                  Tab(text: 'Art'),
                 ],
               ),
               Expanded(
@@ -335,6 +356,7 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
                       scrollCtrl: _scrollCtrl3,
                       onSend: _sendMessage,
                     ),
+                    const ArtGeneratingScreen(),
                   ],
                 ),
               ),
@@ -555,24 +577,17 @@ class _MessageList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.transparent, // Explicit background to catch mouse events
-      child: Scrollbar(
+    return CosmicScrollbar(
+      controller: ctrl,
+      child: ListView.builder(
         controller: ctrl,
-        thumbVisibility: true,
-        trackVisibility: true,
-        interactive: true,
-        thickness: 12.0, // Thicker to ensure hit area
-        child: ListView.builder(
-          controller: ctrl,
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          itemCount: messages.length + (thinking ? 1 : 0),
-          itemBuilder: (_, i) {
-            if (i == messages.length) return const _ThinkingBubble();
-            return _BubbleWidget(bubble: messages[i]);
-          },
-        ),
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        itemCount: messages.length + (thinking ? 1 : 0),
+        itemBuilder: (_, i) {
+          if (i == messages.length) return const _ThinkingBubble();
+          return _BubbleWidget(bubble: messages[i]);
+        },
       ),
     );
   }
