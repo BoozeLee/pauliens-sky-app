@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/ai_service.dart';
 import '../services/premium_service.dart';
+import '../services/supabase_service.dart';
 import '../state/app_state.dart';
 import '../theme/cosmic_theme.dart';
 import '../widgets/sky_background.dart';
+import 'art_generating_screen.dart';
 
 class AiScreen extends StatefulWidget {
   const AiScreen({super.key});
@@ -15,8 +17,10 @@ class AiScreen extends StatefulWidget {
 
 class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
   late TabController _tabs;
-  final _chatCtrl     = TextEditingController();
-  final _scrollCtrl   = ScrollController();
+  final _chatCtrl = TextEditingController();
+  final _scrollCtrl1 = ScrollController();
+  final _scrollCtrl2 = ScrollController();
+  final _scrollCtrl3 = ScrollController();
   final List<_ChatBubble> _messages = [];
   bool _thinking = false;
   AiProvider _provider = AiProvider.anthropic;
@@ -27,24 +31,32 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
     _tabs = TabController(length: 3, vsync: this);
     _provider = PremiumService.instance.hasAnthropicKey
         ? AiProvider.anthropic
-        : AiProvider.gemini;
+        : AiProvider.openai;
   }
 
   @override
   void dispose() {
     _tabs.dispose();
     _chatCtrl.dispose();
-    _scrollCtrl.dispose();
+    _scrollCtrl1.dispose();
+    _scrollCtrl2.dispose();
+    _scrollCtrl3.dispose();
     super.dispose();
   }
 
   Future<void> _sendQuickAction(String type) async {
-    final state   = context.read<AppState>();
+    final state = context.read<AppState>();
     final premium = PremiumService.instance;
-    if (!premium.hasAnyKey) { _showNoKeySheet(); return; }
+    if (!premium.hasAnyKey && !AiService.hasServerProxy) {
+      _showNoKeySheet();
+      return;
+    }
 
     final allowed = await premium.consumeAiCall();
-    if (!allowed) { _showQuotaSheet(); return; }
+    if (!allowed) {
+      _showQuotaSheet();
+      return;
+    }
 
     setState(() => _thinking = true);
     try {
@@ -56,7 +68,8 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
         case 'daily':
           result = await ai.dailyReading(state.chart!, prefer: _provider);
         case 'personality':
-          result = await ai.syntheticPersonality(state.chart!, prefer: _provider);
+          result =
+              await ai.syntheticPersonality(state.chart!, prefer: _provider);
         default:
           result = '';
       }
@@ -64,6 +77,12 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
         _messages.add(_ChatBubble(role: 'assistant', text: result));
         _thinking = false;
       });
+      await SupabaseService.instance.saveAiMessage(
+        conversationId: 'quick-$type',
+        role: 'assistant',
+        content: result,
+        metadata: {'type': type, 'provider': _provider.name},
+      );
       _scrollToBottom();
     } catch (e) {
       setState(() {
@@ -78,15 +97,28 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
     if (text.isEmpty) return;
 
     final premium = PremiumService.instance;
-    if (!premium.hasAnyKey) { _showNoKeySheet(); return; }
+    if (!premium.hasAnyKey && !AiService.hasServerProxy) {
+      _showNoKeySheet();
+      return;
+    }
     final allowed = await premium.consumeAiCall();
-    if (!allowed) { _showQuotaSheet(); return; }
+    if (!mounted) return;
+    if (!allowed) {
+      _showQuotaSheet();
+      return;
+    }
 
     final state = context.read<AppState>();
     setState(() {
       _messages.add(_ChatBubble(role: 'user', text: text));
       _thinking = true;
     });
+    await SupabaseService.instance.saveAiMessage(
+      conversationId: 'chat',
+      role: 'user',
+      content: text,
+      metadata: {'provider': _provider.name},
+    );
     _chatCtrl.clear();
     _scrollToBottom();
 
@@ -95,12 +127,18 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
           .where((m) => m.role != 'error')
           .map((m) => AiMessage(role: m.role, content: m.text))
           .toList();
-      final reply = await premium.aiService.chat(
-        text, state.chart!, history, prefer: _provider);
+      final reply = await premium.aiService
+          .chat(text, state.chart!, history, prefer: _provider);
       setState(() {
         _messages.add(_ChatBubble(role: 'assistant', text: reply));
         _thinking = false;
       });
+      await SupabaseService.instance.saveAiMessage(
+        conversationId: 'chat',
+        role: 'assistant',
+        content: reply,
+        metadata: {'provider': _provider.name},
+      );
     } catch (e) {
       setState(() {
         _messages.add(_ChatBubble(role: 'error', text: e.toString()));
@@ -112,9 +150,16 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollCtrl.hasClients) {
-        _scrollCtrl.animateTo(
-          _scrollCtrl.position.maxScrollExtent,
+      final ctrl = switch (_tabs.index) {
+        0 => _scrollCtrl1,
+        1 => _scrollCtrl2,
+        2 => _scrollCtrl3,
+        _ => null,
+      };
+
+      if (ctrl != null && ctrl.hasClients) {
+        ctrl.animateTo(
+          ctrl.position.maxScrollExtent,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
@@ -131,11 +176,12 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
       builder: (_) => Padding(
         padding: const EdgeInsets.all(24),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Text('Add an API Key', style: Theme.of(context).textTheme.displayMedium),
+          Text('Add an API Key',
+              style: Theme.of(context).textTheme.displayMedium),
           const SizedBox(height: 12),
           Text(
-            'Go to Settings and add your Anthropic or Google Gemini API key. '
-            'It\'s free to get one and unlocks unlimited AI readings.',
+            'No server AI route is configured for this build. Go to Settings and '
+            'add your Anthropic, Gemini, or OpenAI API key.',
             style: Theme.of(context).textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
@@ -162,7 +208,8 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
       builder: (_) => Padding(
         padding: const EdgeInsets.all(24),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Text('Daily Limit Reached', style: Theme.of(context).textTheme.displayMedium),
+          Text('Daily Limit Reached',
+              style: Theme.of(context).textTheme.displayMedium),
           const SizedBox(height: 12),
           Text(
             'Free users get 3 AI readings per day. '
@@ -196,25 +243,49 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
               // App bar
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                child: Row(children: [
-                  Text('AI Astrologer',
-                      style: Theme.of(context)
-                          .textTheme
-                          .displayMedium
-                          ?.copyWith(fontSize: 20)),
-                  const Spacer(),
-                  _ProviderToggle(
-                    current: _provider,
-                    hasClaude: premium.hasAnthropicKey,
-                    hasGemini: premium.hasGeminiKey,
-                    hasOpenAi: premium.hasOpenAiKey,
-                    onChanged: (p) => setState(() => _provider = p),
-                  ),
-                ]),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'AI Astrologer',
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context)
+                            .textTheme
+                            .displayMedium
+                            ?.copyWith(fontSize: 20),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.palette_outlined, size: 22),
+                      tooltip: 'Art Generator',
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const ArtGeneratingScreen(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    _ProviderToggle(
+                      current: _provider,
+                      hasClaude: premium.hasAnthropicKey,
+                      hasGemini: premium.hasGeminiKey,
+                      hasOpenAi: premium.hasOpenAiKey,
+                      serverProxy: AiService.hasServerProxy,
+                      onChanged: (p) => setState(() => _provider = p),
+                    ),
+                  ],
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 6, 20, 0),
                 child: _AiStatusRow(premium: premium),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                child: _AiEnvironmentBanner(
+                  hasServerProxy: AiService.hasServerProxy,
+                  hasAnyKey: premium.hasAnyKey,
+                ),
               ),
               const SizedBox(height: 12),
               // Quick action tabs
@@ -236,30 +307,32 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
                   children: [
                     _QuickTab(
                       label: 'Full Chart Reading',
-                      description: 'A deep multi-cultural interpretation of your entire birth chart — '
+                      description:
+                          'A deep multi-cultural interpretation of your entire birth chart — '
                           'weaving Western, Vedic, Chinese, and Mayan perspectives.',
                       actionLabel: 'READ MY CHART',
                       icon: '✦',
                       onAction: () => _sendQuickAction('interpret'),
                       messages: _messages,
                       thinking: _thinking,
-                      scrollCtrl: _scrollCtrl,
+                      scrollCtrl: _scrollCtrl1,
                     ),
                     _QuickTab(
                       label: 'Today\'s Reading',
-                      description: 'What the current sky is saying to your natal chart right now.',
+                      description:
+                          'What the current sky is saying to your natal chart right now.',
                       actionLabel: 'GET TODAY\'S READING',
                       icon: '☽',
                       onAction: () => _sendQuickAction('daily'),
                       messages: _messages,
                       thinking: _thinking,
-                      scrollCtrl: _scrollCtrl,
+                      scrollCtrl: _scrollCtrl2,
                     ),
                     _ChatTab(
                       messages: _messages,
                       thinking: _thinking,
                       ctrl: _chatCtrl,
-                      scrollCtrl: _scrollCtrl,
+                      scrollCtrl: _scrollCtrl3,
                       onSend: _sendMessage,
                     ),
                   ],
@@ -278,6 +351,7 @@ class _ProviderToggle extends StatelessWidget {
   final bool hasClaude;
   final bool hasGemini;
   final bool hasOpenAi;
+  final bool serverProxy;
   final ValueChanged<AiProvider> onChanged;
 
   const _ProviderToggle({
@@ -285,6 +359,7 @@ class _ProviderToggle extends StatelessWidget {
     required this.hasClaude,
     required this.hasGemini,
     required this.hasOpenAi,
+    required this.serverProxy,
     required this.onChanged,
   });
 
@@ -298,9 +373,9 @@ class _ProviderToggle extends StatelessWidget {
         border: Border.all(color: CosmicColors.divider),
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
-        _chip('Claude', AiProvider.anthropic, hasClaude, '🤖'),
-        _chip('Gemini', AiProvider.gemini, hasGemini, '✨'),
-        _chip('GPT', AiProvider.openai, hasOpenAi, '⚡'),
+        _chip('Claude', AiProvider.anthropic, hasClaude || serverProxy, '🤖'),
+        _chip('Gemini', AiProvider.gemini, hasGemini || serverProxy, '✨'),
+        _chip('GPT', AiProvider.openai, hasOpenAi || serverProxy, '⚡'),
       ]),
     );
   }
@@ -322,7 +397,9 @@ class _ProviderToggle extends StatelessWidget {
           style: TextStyle(
             fontSize: 11,
             color: available
-                ? (selected ? CosmicColors.neonLavender : CosmicColors.textSecondary)
+                ? (selected
+                    ? CosmicColors.neonLavender
+                    : CosmicColors.textSecondary)
                 : CosmicColors.textMuted,
           ),
         ),
@@ -358,7 +435,8 @@ class _QuickTab extends StatelessWidget {
       Expanded(
         child: messages.isEmpty
             ? _EmptyState(icon: icon, label: label, description: description)
-            : _MessageList(messages: messages, thinking: thinking, ctrl: scrollCtrl),
+            : _MessageList(
+                messages: messages, thinking: thinking, ctrl: scrollCtrl),
       ),
       Padding(
         padding: const EdgeInsets.all(16),
@@ -369,7 +447,8 @@ class _QuickTab extends StatelessWidget {
             onPressed: thinking ? null : onAction,
             child: thinking
                 ? const SizedBox(
-                    width: 18, height: 18,
+                    width: 18,
+                    height: 18,
                     child: CircularProgressIndicator(
                         strokeWidth: 2, color: Colors.black))
                 : Text(actionLabel),
@@ -400,7 +479,7 @@ class _ChatTab extends StatelessWidget {
     return Column(children: [
       Expanded(
         child: messages.isEmpty
-            ? _EmptyState(
+            ? const _EmptyState(
                 icon: '💬',
                 label: 'Astrology Chat',
                 description: 'Ask anything about your chart — '
@@ -428,7 +507,7 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(32),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Text(icon, style: const TextStyle(fontSize: 40)),
@@ -449,8 +528,10 @@ class _EmptyState extends StatelessWidget {
               border: Border.all(color: CosmicColors.divider),
             ),
             child: Text(
-              'Free: 3 readings/day\nPremium (own key): unlimited',
-              style: Theme.of(context).textTheme.bodyMedium
+              'Demo agent: server routed\nOwn key: direct provider chat',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
                   ?.copyWith(fontSize: 11),
               textAlign: TextAlign.center,
             ),
@@ -474,14 +555,20 @@ class _MessageList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
+    return Scrollbar(
       controller: ctrl,
-      padding: const EdgeInsets.all(16),
-      itemCount: messages.length + (thinking ? 1 : 0),
-      itemBuilder: (_, i) {
-        if (i == messages.length) return const _ThinkingBubble();
-        return _BubbleWidget(bubble: messages[i]);
-      },
+      thumbVisibility: true,
+      thickness: 6.0,
+      child: ListView.builder(
+        controller: ctrl,
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        itemCount: messages.length + (thinking ? 1 : 0),
+        itemBuilder: (_, i) {
+          if (i == messages.length) return const _ThinkingBubble();
+          return _BubbleWidget(bubble: messages[i]);
+        },
+      ),
     );
   }
 }
@@ -492,9 +579,9 @@ class _BubbleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isUser  = bubble.role == 'user';
+    final isUser = bubble.role == 'user';
     final isError = bubble.role == 'error';
-    final color   = isError
+    final color = isError
         ? const Color(0xFFFF4444)
         : isUser
             ? CosmicColors.neonLavender
@@ -515,7 +602,9 @@ class _BubbleWidget extends StatelessWidget {
         child: Text(
           bubble.text,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: isUser ? CosmicColors.textPrimary : CosmicColors.textPrimary,
+                color: isUser
+                    ? CosmicColors.textPrimary
+                    : CosmicColors.textPrimary,
                 height: 1.6,
               ),
         ),
@@ -528,30 +617,30 @@ class _ThinkingBubble extends StatelessWidget {
   const _ThinkingBubble();
   @override
   Widget build(BuildContext context) => Align(
-    alignment: Alignment.centerLeft,
-    child: Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: CosmicColors.neonCyan.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-            color: CosmicColors.neonCyan.withValues(alpha: 0.25)),
-      ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        SizedBox(
-          width: 16, height: 16,
-          child: CircularProgressIndicator(
-              strokeWidth: 1.5,
-              color: CosmicColors.neonCyan.withValues(alpha: 0.7)),
+        alignment: Alignment.centerLeft,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: CosmicColors.neonCyan.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+                color: CosmicColors.neonCyan.withValues(alpha: 0.25)),
+          ),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                  strokeWidth: 1.5,
+                  color: CosmicColors.neonCyan.withValues(alpha: 0.7)),
+            ),
+            const SizedBox(width: 10),
+            const Text('Reading the stars…',
+                style: TextStyle(color: CosmicColors.textMuted, fontSize: 12)),
+          ]),
         ),
-        const SizedBox(width: 10),
-        const Text('Reading the stars…',
-            style: TextStyle(
-                color: CosmicColors.textMuted, fontSize: 12)),
-      ]),
-    ),
-  );
+      );
 }
 
 class _ChatInput extends StatelessWidget {
@@ -569,10 +658,9 @@ class _ChatInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: CosmicColors.surface,
-        border: const Border(
-            top: BorderSide(color: CosmicColors.divider)),
+        border: Border(top: BorderSide(color: CosmicColors.divider)),
       ),
       child: Row(children: [
         Expanded(
@@ -583,17 +671,19 @@ class _ChatInput extends StatelessWidget {
             decoration: const InputDecoration(
               hintText: 'Ask about your chart…',
               border: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             ),
-            style: const TextStyle(
-                color: CosmicColors.textPrimary, fontSize: 14),
+            style:
+                const TextStyle(color: CosmicColors.textPrimary, fontSize: 14),
           ),
         ),
         const SizedBox(width: 8),
         GestureDetector(
           onTap: thinking ? null : onSend,
           child: Container(
-            width: 40, height: 40,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: CosmicColors.neonLavender.withValues(alpha: 0.2),
@@ -602,9 +692,8 @@ class _ChatInput extends StatelessWidget {
             ),
             child: Icon(
               Icons.send_rounded,
-              color: thinking
-                  ? CosmicColors.textMuted
-                  : CosmicColors.neonLavender,
+              color:
+                  thinking ? CosmicColors.textMuted : CosmicColors.neonLavender,
               size: 18,
             ),
           ),
@@ -631,9 +720,9 @@ class _AiStatusRow extends StatelessWidget {
     return Row(
       children: [
         _StatusDot(
-          label: 'AETHER',
-          tooltip: 'Local llama.cpp — download a GGUF model in Settings',
-          active: false, // runtime check via LlamaService would require ChangeNotifier
+          label: 'BSL',
+          tooltip: 'Server neuromorphic agent with LangSmith tracing',
+          active: AiService.hasServerProxy,
           color: CosmicColors.neonCyan,
         ),
         const SizedBox(width: 8),
@@ -668,6 +757,77 @@ class _AiStatusRow extends StatelessWidget {
   }
 }
 
+class _AiEnvironmentBanner extends StatelessWidget {
+  final bool hasServerProxy;
+  final bool hasAnyKey;
+
+  const _AiEnvironmentBanner({
+    required this.hasServerProxy,
+    required this.hasAnyKey,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final (label, body, color) = hasServerProxy
+        ? (
+            'Demo agent online',
+            'The app can route chat through the server-side neuromorphic agent when local keys are missing.',
+            CosmicColors.neonGreen,
+          )
+        : hasAnyKey
+            ? (
+                'Bring-your-own-key mode',
+                'Server proxy is off, so chat uses locally configured provider keys only.',
+                CosmicColors.neonCyan,
+              )
+            : (
+                'AI unavailable',
+                'Add a provider key in Settings or enable the server proxy to restore chat.',
+                CosmicColors.neonYellow,
+              );
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.auto_awesome, color: color, size: 18),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  body,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: CosmicColors.textSecondary, height: 1.35),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _StatusDot extends StatelessWidget {
   final String label;
   final String tooltip;
@@ -685,7 +845,8 @@ class _StatusDot extends StatelessWidget {
       message: tooltip,
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         Container(
-          width: 6, height: 6,
+          width: 6,
+          height: 6,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: active ? color : CosmicColors.textMuted,
