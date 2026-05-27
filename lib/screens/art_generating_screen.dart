@@ -95,8 +95,14 @@ class _ArtGeneratingScreenState extends State<ArtGeneratingScreen> {
           'Celestial scene with zodiac symbols, cosmic colors, mystical elements, '
           'neon accents, and celestial formations. Professional digital art style.';
 
+      print('🎨 DEBUG: Starting art generation with prompt: $artPrompt');
+      print('🔑 DEBUG: Has OpenAI key: ${premium.hasOpenAiKey}');
+
       // First generate image, then add description
       ai.generateArtImage(artPrompt).then((imageUrl) {
+        print('✅ DEBUG: Image generated successfully!');
+        print('🖼️  DEBUG: Image URL: $imageUrl');
+        
         if (mounted) {
           setState(() {
             _messages.add(_ArtMessage(
@@ -106,6 +112,7 @@ class _ArtGeneratingScreenState extends State<ArtGeneratingScreen> {
                   '🎨 **Art Style**: Cosmic astrology theme\n'
                   '🌟 **Elements**: Zodiac symbols, celestial formations\n'
                   '🌌 **Colors**: Cosmic palette with mystical accents\n\n'
+                  '**Image URL**: $imageUrl\n\n'
                   'The AI has created a unique cosmic artwork inspired by your birth chart and imagination!',
               imageUrl: imageUrl,
             ));
@@ -114,11 +121,16 @@ class _ArtGeneratingScreenState extends State<ArtGeneratingScreen> {
           _scrollToBottom();
         }
       }).catchError((error) {
+        print('❌ DEBUG: Error generating art: ${error.toString()}');
         if (mounted) {
           setState(() {
             _messages.add(_ArtMessage(
               role: 'error',
-              text: 'Failed to generate art image: ${error.toString()}',
+              text: 'Failed to generate art image: ${error.toString()}\n\n'
+                  'Please check:\n'
+                  '1. Your OpenAI API key is configured in Settings\n'
+                  '2. You have sufficient credits/balance\n'
+                  '3. DALL-E access is enabled in your OpenAI account',
             ));
             _generating = false;
           });
