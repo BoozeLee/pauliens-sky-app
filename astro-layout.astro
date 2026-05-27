@@ -1,0 +1,53 @@
+---
+import type { AstroGlobal } from 'astro/runtime/runtime';
+import Head from 'astro/head';
+
+interface LayoutProps {
+  title: string;
+  children: any;
+}
+
+export default function Layout({ title, children }: LayoutProps) {
+  return (
+    <html lang="en">
+      <Head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{title}</title>
+        <meta name="description" content="Cosmic Art Generator - Create stunning astrology-inspired artwork with AI" />
+        <style>{`
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: white;
+          }
+          
+          .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+          }
+          
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+          }
+          
+          .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+          }
+        `}</style>
+      </Head>
+      <body>
+        {children}
+      </body>
+    </html>
+  );
+}
+---

@@ -1,0 +1,23 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "bash scripts/vercel_build.sh",
+    "vercel-build": "bash scripts/vercel_build.sh",
+    "test": "node --test test/server/*.test.js",
+    "supabase:users": "node scripts/supabase_admin_users.mjs",
+    "scan:secrets": "node scripts/scan_secrets.mjs",
+    "dev": "astro dev",
+    "start": "astro dev",
+    "astro-build": "astro build",
+    "astro-preview": "astro preview"
+  },
+  "dependencies": {
+    "langsmith": "^0.7.1",
+    "astro": "^4.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/react": "^3.0.0",
+    "@astrojs/tailwind": "^5.0.0",
+    "tailwindcss": "^3.0.0"
+  }
+}
