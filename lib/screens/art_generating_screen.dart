@@ -24,8 +24,8 @@ class _ArtGeneratingScreenState extends State<ArtGeneratingScreen> {
   @override
   void initState() {
     super.initState();
-    _promptController = const TextEditingController();
-    _scrollController = const ScrollController();
+    _promptController = TextEditingController();
+    _scrollController = ScrollController();
   }
 
   @override
@@ -58,8 +58,7 @@ class _ArtGeneratingScreenState extends State<ArtGeneratingScreen> {
     _promptController.clear();
     _scrollToBottom();
 
-    // Get app state and premium service
-    final state = context.read<AppState>();
+    // Get premium service
     final premium = PremiumService.instance;
 
     // Check if user has API keys or server proxy
@@ -301,9 +300,9 @@ class _ArtBubbleWidget extends StatelessWidget {
                     errorWidget: (context, url, error) => Container(
                       color: CosmicColors.neonCyan.withValues(alpha: 0.05),
                       child: Column(
-                        mainAxisAlignment: center,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.image_not_supported,
                             color: CosmicColors.neonCyan,
                             size: 40,
