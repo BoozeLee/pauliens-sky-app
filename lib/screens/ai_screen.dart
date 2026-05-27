@@ -558,7 +558,9 @@ class _MessageList extends StatelessWidget {
     return Scrollbar(
       controller: ctrl,
       thumbVisibility: true,
-      thickness: 6.0,
+      trackVisibility: true,
+      interactive: true,
+      thickness: 8.0,
       child: ListView.builder(
         controller: ctrl,
         physics: const AlwaysScrollableScrollPhysics(),
