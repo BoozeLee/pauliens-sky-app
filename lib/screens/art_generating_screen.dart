@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../theme/cosmic_theme.dart';
 import '../widgets/art_background.dart';
@@ -91,16 +92,23 @@ class _ArtGeneratingScreenState extends State<ArtGeneratingScreen> {
 
       // Generate art using AI service
       final ai = premium.aiService;
-      final artPrompt = 'Create cosmic/astrology-themed art based on this prompt: "$prompt". '
-          'Generate a vivid description of celestial art with zodiac elements, cosmic colors, '
-          'and mystical symbolism. Keep it concise but detailed enough for artistic interpretation.';
+      final artPrompt = 'Cosmic astrology-themed art: $prompt. '
+          'Celestial scene with zodiac symbols, cosmic colors, mystical elements, '
+          'neon accents, and celestial formations. Professional digital art style.';
 
-      ai.chat(artPrompt, state.chart!, [], prefer: AiProvider.anthropic).then((artDescription) {
+      // First generate image, then add description
+      ai.generateArtImage(artPrompt).then((imageUrl) {
         if (mounted) {
           setState(() {
             _messages.add(_ArtMessage(
               role: 'assistant',
-              text: artDescription,
+              text: '✨ Cosmic Art Generated!\n\n'
+                  'Your celestial masterpiece has been created based on your prompt: "$prompt"\n\n'
+                  '🎨 **Art Style**: Cosmic astrology theme\n'
+                  '🌟 **Elements**: Zodiac symbols, celestial formations\n'
+                  '🌌 **Colors**: Cosmic palette with mystical accents\n\n'
+                  'The AI has created a unique cosmic artwork inspired by your birth chart and imagination!',
+              imageUrl: imageUrl,
             ));
             _generating = false;
           });
@@ -111,7 +119,7 @@ class _ArtGeneratingScreenState extends State<ArtGeneratingScreen> {
           setState(() {
             _messages.add(_ArtMessage(
               role: 'error',
-              text: 'Failed to generate art: ${error.toString()}',
+              text: 'Failed to generate art image: ${error.toString()}',
             ));
             _generating = false;
           });
@@ -187,7 +195,8 @@ class _ArtGeneratingScreenState extends State<ArtGeneratingScreen> {
 class _ArtMessage {
   final String role;
   final String text;
-  const _ArtMessage({required this.role, required this.text});
+  final String? imageUrl;
+  const _ArtMessage({required this.role, required this.text, this.imageUrl});
 }
 
 class _ArtEmptyState extends StatelessWidget {
@@ -211,7 +220,7 @@ class _ArtEmptyState extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               'Describe your cosmic vision and the AI will generate '
-              'astrology-inspired art descriptions based on your birth chart.',
+              'actual cosmic artwork images using DALL-3 based on your birth chart.',
               style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
@@ -248,8 +257,12 @@ class _ArtBubbleWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isUser = bubble.role == 'user';
-    final color =
-        isUser ? CosmicColors.neonLavender : CosmicColors.neonCyan;
+    final isError = bubble.role == 'error';
+    final color = isError
+        ? const Color(0xFFFF4444)
+        : isUser
+            ? CosmicColors.neonLavender
+            : CosmicColors.neonCyan;
 
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -263,12 +276,62 @@ class _ArtBubbleWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
-        child: Text(
-          bubble.text,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: CosmicColors.textPrimary,
-                height: 1.6,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (bubble.imageUrl != null && bubble.role == 'assistant')
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: CachedNetworkImage(
+                    imageUrl: bubble.imageUrl!,
+                    width: double.infinity,
+                    height: 200,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      color: CosmicColors.neonCyan.withValues(alpha: 0.1),
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: CosmicColors.neonCyan,
+                        ),
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      color: CosmicColors.neonCyan.withValues(alpha: 0.05),
+                      child: Column(
+                        mainAxisAlignment: center,
+                        children: [
+                          Icon(
+                            Icons.image_not_supported,
+                            color: CosmicColors.neonCyan,
+                            size: 40,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Image failed to load',
+                            style: TextStyle(
+                              color: CosmicColors.textMuted,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
+            Text(
+              bubble.text,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: isError
+                        ? CosmicColors.textPrimary
+                        : CosmicColors.textPrimary,
+                    height: 1.6,
+                  ),
+            ),
+          ],
         ),
       ),
     );
