@@ -12,6 +12,7 @@ class CosmicColors {
   static const neonGreen = Color(0xFF39FF7E);
   static const neonYellow = Color(0xFFFFE84D);
   static const neonLavender = Color(0xFFB57BFF);
+  static const neonOrange = Color(0xFFFF9800);
 
   static const textPrimary = Color(0xFFEDE8FF);
   static const textSecondary = Color(0xFF9B8EC4);

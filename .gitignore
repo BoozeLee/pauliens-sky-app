@@ -20,6 +20,11 @@ build/
 **/ios/Flutter/Flutter.framework
 **/ios/Flutter/Generated.xcconfig
 **/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/fastlane/report.xml
+**/ios/fastlane/test_output/
+**/ios/fastlane/screenshots/
 
 # macOS
 **/macos/Flutter/ephemeral
@@ -28,7 +33,13 @@ build/
 *.log
 *.DS_Store
 .env
+.env.*.local
+
+# Android signing
+**/android/key.properties
+**/android/**/*.jks
 secrets/
 
 # llama.cpp embedded repo (add as submodule if needed)
 native/llama/llama.cpp/
+.vercel

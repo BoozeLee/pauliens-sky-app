@@ -25,7 +25,10 @@ class PauliensApp extends StatelessWidget {
           return Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 480),
-              child: child!,
+              child: ScrollConfiguration(
+                behavior: _AlwaysVisibleScrollbar(),
+                child: child!,
+              ),
             ),
           );
         },
@@ -33,6 +36,26 @@ class PauliensApp extends StatelessWidget {
       ),
     );
   }
+}
+
+// ── Always-visible scrollbar behavior ──────────────────────────────────────
+
+class _AlwaysVisibleScrollbar extends ScrollBehavior {
+  @override
+  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
+    return Scrollbar(
+      controller: details.controller,
+      thumbVisibility: true,
+      trackVisibility: true,
+      thickness: 6,
+      radius: const Radius.circular(3),
+      child: child,
+    );
+  }
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) =>
+      const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics());
 }
 
 // Convenience extension so any widget can do: context.t('key')

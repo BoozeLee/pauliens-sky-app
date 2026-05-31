@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/ai_service.dart';
 import '../services/premium_service.dart';
+import '../services/aether/engine.dart';
 import '../state/app_state.dart';
 import '../theme/cosmic_theme.dart';
 import '../widgets/sky_background.dart';
 
 class AiScreen extends StatefulWidget {
-  const AiScreen({super.key});
+  final VoidCallback? onNavigateSettings;
+  const AiScreen({super.key, this.onNavigateSettings});
 
   @override
   State<AiScreen> createState() => _AiScreenState();
@@ -25,9 +27,12 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _tabs = TabController(length: 3, vsync: this);
-    _provider = PremiumService.instance.hasAnthropicKey
-        ? AiProvider.anthropic
-        : AiProvider.gemini;
+    final hasKeys = PremiumService.instance.hasAnyKey;
+    _provider = hasKeys
+        ? (PremiumService.instance.hasAnthropicKey
+            ? AiProvider.anthropic
+            : AiProvider.gemini)
+        : AiProvider.openai; // will be overridden to AETHER
   }
 
   @override
@@ -41,7 +46,36 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
   Future<void> _sendQuickAction(String type) async {
     final state   = context.read<AppState>();
     final premium = PremiumService.instance;
-    if (!premium.hasAnyKey) { _showNoKeySheet(); return; }
+    final hasApiKeys = premium.hasAnyKey;
+
+    if (!hasApiKeys) {
+      // Use AETHER built-in engine
+      setState(() => _thinking = true);
+      try {
+        String result;
+        switch (type) {
+          case 'interpret':
+            result = await AetherEngine.instance.interpretChart(state.chart!);
+          case 'daily':
+            result = await AetherEngine.instance.dailyReading(state.chart!);
+          case 'personality':
+            result = await AetherEngine.instance.syntheticPersonality(state.chart!);
+          default:
+            result = '';
+        }
+        setState(() {
+          _messages.add(_ChatBubble(role: 'assistant', text: result));
+          _thinking = false;
+        });
+        _scrollToBottom();
+      } catch (e) {
+        setState(() {
+          _messages.add(_ChatBubble(role: 'error', text: e.toString()));
+          _thinking = false;
+        });
+      }
+      return;
+    }
 
     final allowed = await premium.consumeAiCall();
     if (!allowed) { _showQuotaSheet(); return; }
@@ -78,11 +112,9 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
     if (text.isEmpty) return;
 
     final premium = PremiumService.instance;
-    if (!premium.hasAnyKey) { _showNoKeySheet(); return; }
-    final allowed = await premium.consumeAiCall();
-    if (!allowed) { _showQuotaSheet(); return; }
-
+    final hasApiKeys = premium.hasAnyKey;
     final state = context.read<AppState>();
+
     setState(() {
       _messages.add(_ChatBubble(role: 'user', text: text));
       _thinking = true;
@@ -91,12 +123,25 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
     _scrollToBottom();
 
     try {
-      final history = _messages
-          .where((m) => m.role != 'error')
-          .map((m) => AiMessage(role: m.role, content: m.text))
-          .toList();
-      final reply = await premium.aiService.chat(
-        text, state.chart!, history, prefer: _provider);
+      String reply;
+      if (!hasApiKeys) {
+        // Use AETHER built-in engine
+        reply = await AetherEngine.instance.chat(
+          text,
+          state.chart!,
+          activeCulture: null,
+        );
+      } else {
+        final allowed = await premium.consumeAiCall();
+        if (!allowed) { _showQuotaSheet(); setState(() => _thinking = false); return; }
+
+        final history = _messages
+            .where((m) => m.role != 'error')
+            .map((m) => AiMessage(role: m.role, content: m.text))
+            .toList();
+        reply = await premium.aiService.chat(
+          text, state.chart!, history, prefer: _provider);
+      }
       setState(() {
         _messages.add(_ChatBubble(role: 'assistant', text: reply));
         _thinking = false;
@@ -143,7 +188,10 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                Navigator.pop(context);
+                widget.onNavigateSettings?.call();
+              },
               child: const Text('GO TO SETTINGS'),
             ),
           ),
@@ -174,7 +222,10 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                Navigator.pop(context);
+                widget.onNavigateSettings?.call();
+              },
               child: const Text('ADD API KEY'),
             ),
           ),
@@ -632,8 +683,8 @@ class _AiStatusRow extends StatelessWidget {
       children: [
         _StatusDot(
           label: 'AETHER',
-          tooltip: 'Local llama.cpp — download a GGUF model in Settings',
-          active: false, // runtime check via LlamaService would require ChangeNotifier
+          tooltip: 'Built-in offline engine — no API key needed',
+          active: true,
           color: CosmicColors.neonCyan,
         ),
         const SizedBox(width: 8),

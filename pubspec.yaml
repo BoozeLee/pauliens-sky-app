@@ -39,9 +39,6 @@ dependencies:
   # Chinese astrology (BaZi, Zi Wei Dou Shu, Chinese zodiac)
   dart_iztro: ^2.0.0
 
-  # Geocoding (lat/lon from city name)
-  geocoding: ^3.0.0
-
   # Timezone
   timezone: ^0.9.4
 
@@ -62,5 +59,3 @@ flutter:
           weight: 400
         - asset: assets/fonts/Cinzel-Bold.ttf
           weight: 700
-        - asset: assets/fonts/Cinzel-Bold.ttf
-          weight: 600
