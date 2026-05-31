@@ -89,16 +89,16 @@ class PentaPrompt {
 
     if (cc != null) {
       if (cc.sunSign != null)
-        buf.writeln('  Sun sign: ${cc.sunSign}');
+        buf.writeln("  Sun sign: ${cc.sunSign}");
       if (cc.moonSign != null)
-        buf.writeln('  Moon sign: ${cc.moonSign}');
-      if (cc.risingSign != null)
-        buf.writeln('  Rising/Ascendant: ${cc.risingSign}');
-      if (cc.description.isNotEmpty)
-        buf.writeln('  Core reading: ${cc.description}');
+        buf.writeln("  Moon sign: ${cc.moonSign}");
+      if (cc.ascendantSign != null)
+        buf.writeln("  Rising/Ascendant: ${cc.ascendantSign}");
+      if (cc.entries.isNotEmpty && cc.entries.first.description != null && cc.entries.first.description!.isNotEmpty)
+        buf.writeln("  Core reading: ${cc.entries.first.description}");
 
       for (final insight in cc.keyInsights.take(3)) {
-        buf.writeln('  • $insight');
+        buf.writeln("  • $insight");
       }
     }
 
