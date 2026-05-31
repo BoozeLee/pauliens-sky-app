@@ -52,7 +52,7 @@ void _inferenceIsolate(SendPort mainPort) {
     if (msg is _LoadRequest) {
       if (ctx != null && ctx!.address != 0) lib.free(ctx!);
 
-      final pathPtr = msg.modelPath.toNativeUtf8();
+      final pathPtr = msg.modelPath.toNativeUint8();
       ctx = lib.load(pathPtr, msg.nThreads, msg.nCtx, msg.nGpuLayers);
       calloc.free(pathPtr);
 
@@ -68,7 +68,7 @@ void _inferenceIsolate(SendPort mainPort) {
         return;
       }
 
-      final promptPtr = msg.prompt.toNativeUtf8();
+      final promptPtr = msg.prompt.toNativeUint8();
       final result = lib.infer(
         ctx!, promptPtr,
         msg.maxTokens, msg.temperature, msg.topP, 64,
