@@ -7,6 +7,7 @@ import '../state/app_state.dart';
 import 'home_screen.dart';
 import 'chart_screen.dart';
 import 'ai_screen.dart';
+import 'art_studio_screen.dart';
 import 'explore_screen.dart';
 import 'settings_screen.dart';
 
@@ -39,7 +40,8 @@ class _MainNavState extends State<MainNav> {
       chart != null
           ? ChartScreen(birthContext: chart.context)
           : const _LoadingScreen(),
-      const AiScreen(),
+      AiScreen(onNavigateSettings: () => switchTo(5)),
+      const ArtStudioScreen(),
       const ExploreScreen(),
       const SettingsScreen(),
     ];

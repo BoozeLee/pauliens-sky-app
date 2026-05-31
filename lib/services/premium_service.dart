@@ -84,7 +84,7 @@ class PremiumService {
   bool   get hasAnthropicKey => _cachedAnthropicKey.isNotEmpty;
   bool   get hasGeminiKey    => _cachedGeminiKey.isNotEmpty;
   bool   get hasOpenAiKey    => _cachedOpenAiKey.isNotEmpty;
-  bool   get hasAnyKey       => hasAnthropicKey || hasGeminiKey || hasOpenAiKey;
+  bool   get hasAnyKey       => hasAnthropicKey || hasGeminiKey || hasOpenAiKey || AiService.proxyUrl.isNotEmpty;
 
   // Call once after init() to populate the in-memory cache
   Future<void> loadApiKeys() async {

@@ -5,7 +5,8 @@
 ///   2. Anthropic Claude (if key present)
 ///   3. Google Gemini (if key present)
 ///   4. OpenAI GPT-4o-mini (if key present)
-///   5. Error state (no AI available)
+///   5. AETHER built-in astrology engine (always available)
+///   6. Error state (no AI available)
 
 import 'package:flutter/foundation.dart';
 import '../services/ai_service.dart';
@@ -16,8 +17,9 @@ import '../services/local_llm/memory_journal.dart';
 import '../services/premium_service.dart';
 import '../services/chart_engine.dart';
 import '../models/culture_chart.dart';
+import '../services/aether/engine.dart';
 
-enum AiProvider { local, claude, gemini, openai, none }
+enum AiProvider { local, claude, gemini, openai, aether, none }
 
 class AiOrchestrator extends ChangeNotifier {
   static final AiOrchestrator instance = AiOrchestrator._();
@@ -31,13 +33,16 @@ class AiOrchestrator extends ChangeNotifier {
   bool get hasClaude => PremiumService.instance.hasAnthropicKey;
   bool get hasGemini => PremiumService.instance.hasGeminiKey;
   bool get hasOpenAi => PremiumService.instance.hasOpenAiKey;
-  bool get hasAny    => hasLocal || hasClaude || hasGemini || hasOpenAi;
+  bool get hasProxy  => AiService.proxyUrl.isNotEmpty;
+  bool get hasAether => true; // AETHER built-in engine is always available
+  bool get hasAny    => hasLocal || hasClaude || hasGemini || hasOpenAi || hasProxy || hasAether;
 
   String get providerLabel => switch (_active) {
     AiProvider.local  => '⬡ AETHER (local)',
     AiProvider.claude => '✦ Claude',
     AiProvider.gemini => '✨ Gemini',
     AiProvider.openai => '⚡ GPT-4o-mini',
+    AiProvider.aether => '◇ AETHER',
     AiProvider.none   => '○ No AI',
   };
 
@@ -46,6 +51,7 @@ class AiOrchestrator extends ChangeNotifier {
     AiProvider.claude => 'Claude',
     AiProvider.gemini => 'Gemini',
     AiProvider.openai => 'OpenAI',
+    AiProvider.aether => 'AETHER',
     AiProvider.none   => 'None',
   };
 
@@ -81,10 +87,11 @@ class AiOrchestrator extends ChangeNotifier {
   }
 
   AiProvider _bestCloudProvider() {
-    if (hasClaude)  return AiProvider.claude;
-    if (hasGemini)  return AiProvider.gemini;
-    if (hasOpenAi)  return AiProvider.openai;
-    return AiProvider.none;
+    if (hasClaude) return AiProvider.claude;
+    if (hasGemini) return AiProvider.gemini;
+    if (hasOpenAi) return AiProvider.openai;
+    if (hasProxy) return AiProvider.claude;
+    return AiProvider.aether; // AETHER is always available
   }
 
   void forceProvider(AiProvider p) {
@@ -122,6 +129,14 @@ class AiOrchestrator extends ChangeNotifier {
           yield i == 0 ? words[i] : ' ${words[i]}';
           await Future.delayed(const Duration(milliseconds: 18));
         }
+        break;
+
+      case AiProvider.aether:
+        yield* _aetherStream(
+          userMessage: userMessage,
+          chart: chart,
+          activeCulture: activeCulture,
+        );
         break;
 
       case AiProvider.none:
@@ -162,6 +177,25 @@ class AiOrchestrator extends ChangeNotifier {
         fullResponse.trim(),
         culture: activeCulture?.name ?? 'western',
       );
+    }
+  }
+
+  Stream<String> _aetherStream({
+    required String userMessage,
+    required FullChart chart,
+    CultureId? activeCulture,
+  }) async* {
+    final response = await AetherEngine.instance.chat(
+      userMessage,
+      chart,
+      activeCulture: activeCulture,
+    );
+
+    // Emit word-by-word for consistent streaming feel
+    final words = response.split(' ');
+    for (int i = 0; i < words.length; i++) {
+      yield i == 0 ? words[i] : ' ${words[i]}';
+      await Future.delayed(const Duration(milliseconds: 18));
     }
   }
 
@@ -209,6 +243,12 @@ class AiOrchestrator extends ChangeNotifier {
           return svc.cultureDeepDive(chart, culture.displayName);
         }
         return svc.interpretChart(chart);
+
+      case AiProvider.aether:
+        if (culture != null) {
+          return await AetherEngine.instance.cultureDeepDive(chart, culture.displayName);
+        }
+        return await AetherEngine.instance.interpretChart(chart);
 
       case AiProvider.none:
         return 'No AI configured. Add an API key or download AETHER local model.';
