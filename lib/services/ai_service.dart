@@ -122,29 +122,36 @@ Rules:
 
   // ── Internal routing ──────────────────────────────────────────────────────
 
-  Future<String> _call(
-    String prompt,
-    FullChart chart, {
-    AiProvider? prefer,
-    List<AiMessage>? history,
-  }) async {
-    final provider = _pickProvider(prefer);
-    if (provider == null) throw Exception('No AI API key configured');
-
-    final system = _systemPrompt(chart);
-    final messages = [
-      ...?history,
-      AiMessage(role: 'user', content: prompt),
-    ];
-
-    if (hasProxy) return _callProxy(provider, system, messages);
-
-    return switch (provider) {
-      AiProvider.anthropic => _callAnthropic(system, messages),
-      AiProvider.gemini    => _callGemini(system, messages),
-      AiProvider.openai    => _callOpenAi(system, messages),
-    };
+Future<String> _call(
+  String prompt,
+  FullChart chart, {
+  AiProvider? prefer,
+  List<AiMessage>? history,
+}) async {
+  final provider = _pickProvider(prefer);
+  if (provider == null) {
+    throw Exception(
+      'No AI API key configured. Please set one of: '
+      'ANTHROPIC_API_KEY, GEMINI_API_KEY, OPENAI_API_KEY environment variables, '
+      'or configure a proxy via PAULIENS_SKY_AI_PROXY_URL. '
+      'For offline use, ensure AETHER engine is available via AiOrchestrator.'
+    );
   }
+
+  final system = _systemPrompt(chart);
+  final messages = [
+    ...?history,
+    AiMessage(role: 'user', content: prompt),
+  ];
+
+  if (hasProxy) return _callProxy(provider, system, messages);
+
+  return switch (provider) {
+    AiProvider.anthropic => _callAnthropic(system, messages),
+    AiProvider.gemini    => _callGemini(system, messages),
+    AiProvider.openai    => _callOpenAi(system, messages),
+  };
+}
 
   Future<String> _callWithHistory(
     String userMessage,

@@ -35,17 +35,21 @@ class ArtGenerationService {
     'watercolor': 'Watercolor',
   };
 
-  static Future<ArtGenerationResult> generate({
-    required String prompt,
-    String style = 'astrological',
-    String? negativePrompt,
-    String provider = 'auto',
-    int width = 1024,
-    int height = 1024,
-  }) async {
-    final url = _imageBaseUrl.isNotEmpty
-        ? '$_imageBaseUrl$_artEndpoint'
-        : _artEndpoint;
+static Future<ArtGenerationResult> generate({
+  required String prompt,
+  String style = 'astrological',
+  String? negativePrompt,
+  String provider = 'auto',
+  int width = 1024,
+  int height = 1024,
+}) async {
+  if (_imageBaseUrl.isEmpty) {
+    throw Exception(
+      'Art generation service not configured. Please set the PAULIENS_SKY_APP_URL environment variable to your deployed backend URL (e.g., https://your-app.vercel.app).'
+    );
+  }
+  
+  final url = '$_imageBaseUrl$_artEndpoint';
 
     final response = await http.post(
       Uri.parse(url),
