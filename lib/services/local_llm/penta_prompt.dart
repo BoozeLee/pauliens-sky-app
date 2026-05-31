@@ -13,6 +13,7 @@
 import '../../models/culture_chart.dart';
 import '../../services/chart_engine.dart';
 import 'memory_journal.dart';
+import '../models/astro_snapshot.dart';
 
 class PentaPrompt {
   static String build({
