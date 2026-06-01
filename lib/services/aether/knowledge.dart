@@ -2,6 +2,7 @@
 /// 
 /// Comprehensive astrological knowledge for deterministic readings.
 /// Covers: zodiac signs, planets, aspects, houses, cultural traditions.
+library aether_knowledge;
 
 class SignProfile {
   final String name;

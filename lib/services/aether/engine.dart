@@ -2,6 +2,7 @@
 ///
 /// Generates personalized astrological readings from chart data.
 /// No external API calls — fully deterministic, locally computed.
+library aether_engine;
 
 import 'dart:math' as math;
 import '../../models/culture_chart.dart';
@@ -16,7 +17,6 @@ class AetherEngine {
 
   final _memory = AetherMemory.instance;
   final _rag = AstroRag.instance;
-  final _rng = math.Random();
 
   // ── Public API ──────────────────────────────────────────────────────────
 
@@ -592,7 +592,6 @@ class AetherEngine {
 
   String _dailyGuidance(FullChart chart) {
     final buf = StringBuffer();
-    final western = chart.chart(CultureId.western);
     final dayOfWeek = DateTime.now().weekday;
 
     // Planetary day ruler

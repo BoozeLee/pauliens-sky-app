@@ -76,20 +76,7 @@ class _ArtStudioScreenState extends State<ArtStudioScreen> {
     ));
   }
 
-  void _showQuotaSheet() {
-    showModalBottomSheet(context: context, builder: (_) => Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Icon(Icons.timer_off, size: 48, color: CosmicColors.neonOrange),
-        const SizedBox(height: 16),
-        Text('Daily limit reached', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        Text('Free AI art is limited. Add your own API key for unlimited use.', textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodySmall),
-        const SizedBox(height: 24),
-        FilledButton(onPressed: () => Navigator.pop(context), child: const Text('OK')),
-      ]),
-    ));
-  }
+
 
   @override
   Widget build(BuildContext context) {

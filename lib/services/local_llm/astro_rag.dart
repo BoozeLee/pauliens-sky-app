@@ -5,8 +5,6 @@
 ///         BaZi principles, Tzolk'in day signs, Egyptian decans,
 ///         Celtic tree lore.
 
-import 'dart:math' as math;
-
 class AstroRag {
   static final AstroRag instance = AstroRag._();
   AstroRag._();

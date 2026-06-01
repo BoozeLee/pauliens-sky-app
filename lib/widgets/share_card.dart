@@ -5,7 +5,6 @@ import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/culture_chart.dart';
 import '../services/chart_engine.dart';
-import '../services/fixed_stars.dart';
 import '../theme/cosmic_theme.dart';
 
 class ShareCardButton extends StatefulWidget {

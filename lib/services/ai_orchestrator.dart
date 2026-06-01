@@ -7,6 +7,7 @@
 ///   4. OpenAI GPT-4o-mini (if key present)
 ///   5. AETHER built-in astrology engine (always available)
 ///   6. Error state (no AI available)
+library ai_orchestrator;
 
 import 'package:flutter/foundation.dart';
 import '../services/ai_service.dart';

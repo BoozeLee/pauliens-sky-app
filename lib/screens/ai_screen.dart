@@ -167,39 +167,7 @@ class _AiScreenState extends State<AiScreen> with TickerProviderStateMixin {
     });
   }
 
-  void _showNoKeySheet() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: CosmicColors.surface,
-      shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (_) => Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Text('Add an API Key', style: Theme.of(context).textTheme.displayMedium),
-          const SizedBox(height: 12),
-          Text(
-            'Go to Settings and add your Anthropic or Google Gemini API key. '
-            'It\'s free to get one and unlocks unlimited AI readings.',
-            style: Theme.of(context).textTheme.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                widget.onNavigateSettings?.call();
-              },
-              child: const Text('GO TO SETTINGS'),
-            ),
-          ),
-          const SizedBox(height: 12),
-        ]),
-      ),
-    );
-  }
+
 
   void _showQuotaSheet() {
     showModalBottomSheet(

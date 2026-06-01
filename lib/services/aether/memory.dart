@@ -2,6 +2,7 @@
 ///
 /// In-memory conversation memory for the current session.
 /// No file I/O — works on web (Vercel) without platform-specific code.
+library aether_memory;
 
 class AetherMemoryEntry {
   final String text;
