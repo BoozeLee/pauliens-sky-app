@@ -1,8 +1,8 @@
 /// LlamaService — high-level Dart API over libaether_llm.so
 /// Inference runs in a separate Isolate so the UI thread never blocks.
 /// Tokens stream back via a SendPort/ReceivePort pair.
+library llama_service;
 
-import 'dart:ffi';
 import 'dart:isolate';
 import 'dart:async';
 import 'dart:io';

@@ -95,7 +95,7 @@ class MayanModule implements CultureModule {
 
   Map<String, String> _nightLord(DateTime date) {
     final jd = _jd(date).toInt();
-    final lords = MayanData.nightLords;
+    const lords = MayanData.nightLords;
     return lords[jd % 9];
   }
 

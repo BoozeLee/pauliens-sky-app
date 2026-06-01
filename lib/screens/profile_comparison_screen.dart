@@ -174,8 +174,6 @@ class _SignsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final wA = chartA.charts.first;
     final wB = chartB.charts.first;
-    final cA = chartA.charts.where((c) => c.id == CultureId.chinese).firstOrNull;
-    final cB = chartB.charts.where((c) => c.id == CultureId.chinese).firstOrNull;
 
     return Row(
       children: [

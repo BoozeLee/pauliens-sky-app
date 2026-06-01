@@ -1,6 +1,7 @@
 /// NASA APOD — Astronomy Picture of the Day
 /// API: https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY
 /// Rate limit: 1000 req/hr with DEMO_KEY. Cached daily.
+library apod_service;
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;

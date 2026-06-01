@@ -77,7 +77,7 @@ Rules:
   // ── Public API ────────────────────────────────────────────────────────────
 
   Future<String> interpretChart(FullChart chart, {AiProvider? prefer}) async {
-    final prompt =
+    const prompt =
         'Give a rich, multi-cultural interpretation of this birth chart, '
         'weaving together the Western, Vedic, Chinese, and Mayan perspectives '
         'into a cohesive portrait. Highlight the most striking themes.';

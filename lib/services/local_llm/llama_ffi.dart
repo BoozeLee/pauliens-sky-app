@@ -1,5 +1,6 @@
 /// Raw dart:ffi bindings to libaether_llm.so
 /// Do not call these directly — use LlamaService instead.
+library llama_ffi;
 
 import 'dart:ffi';
 import 'dart:io';

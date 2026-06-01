@@ -22,11 +22,11 @@ class ZodiacWheel extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        Row(
+        const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _LegendDot(CosmicColors.neonCyan, 'Tropical'),
-            const SizedBox(width: 16),
+            SizedBox(width: 16),
             _LegendDot(CosmicColors.neonLavender, 'Sidereal'),
           ],
         ),
@@ -85,7 +85,7 @@ class _ZodiacWheelPainter extends CustomPainter {
     canvas.drawCircle(
       center, r,
       Paint()
-        ..shader = RadialGradient(
+        ..shader = const RadialGradient(
           colors: [CosmicColors.surface, CosmicColors.background],
         ).createShader(Rect.fromCircle(center: center, radius: r)),
     );
@@ -208,7 +208,8 @@ class _ZodiacWheelPainter extends CustomPainter {
 
     final tp = TextPainter(textDirection: TextDirection.ltr);
 
-    void _label(String text, Offset pos) {
+    void label(String text, Offset pos) {
+      // ignore: no_leading_underscores_for_local_identifiers
       tp.text = TextSpan(
         text: text,
         style: const TextStyle(
@@ -218,9 +219,9 @@ class _ZodiacWheelPainter extends CustomPainter {
       tp.paint(canvas, pos - Offset(tp.width / 2, tp.height / 2));
     }
 
-    _label('ASC', Offset(center.dx + innerR - 8, center.dy - 7));
-    _label('DSC', Offset(center.dx - innerR + 8, center.dy - 7));
-    _label('MC',  Offset(center.dx + 8, center.dy - innerR + 7));
+    label('ASC', Offset(center.dx + innerR - 8, center.dy - 7));
+    label('DSC', Offset(center.dx - innerR + 8, center.dy - 7));
+    label('MC',  Offset(center.dx + 8, center.dy - innerR + 7));
   }
 
   void _drawPlanets(

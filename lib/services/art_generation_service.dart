@@ -49,7 +49,7 @@ static Future<ArtGenerationResult> generate({
     );
   }
   
-  final url = '$_imageBaseUrl$_artEndpoint';
+  const url = '$_imageBaseUrl$_artEndpoint';
 
     final response = await http.post(
       Uri.parse(url),

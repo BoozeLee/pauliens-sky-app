@@ -4,7 +4,6 @@
 /// No external API calls — fully deterministic, locally computed.
 library aether_engine;
 
-import 'dart:math' as math;
 import '../../models/culture_chart.dart';
 import '../../services/chart_engine.dart';
 import '../../services/local_llm/astro_rag.dart';
@@ -238,7 +237,7 @@ class AetherEngine {
         buf.writeln('Your Sun in ${sign.name} (${sign.element}, ${sign.modality})');
         buf.writeln('${sign.mythology}');
         buf.writeln();
-        buf.writeln('Strengths: ${sign.strengths}');
+        buf.writeln('Strengths: $sign.strengths');
         buf.writeln('Growth edges: ${sign.challenges}');
       }
     }

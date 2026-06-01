@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../services/ai_service.dart';
 import '../services/chart_engine.dart';
 import '../services/premium_service.dart';
 import '../theme/cosmic_theme.dart';

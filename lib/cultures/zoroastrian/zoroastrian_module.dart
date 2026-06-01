@@ -29,7 +29,7 @@ class ZoroastrianModule implements CultureModule {
       CultureEntry(
         label: 'Day Yazata',
         value: '${dayYaz.name} (day $dayNum)',
-        description: '${dayYaz.fullName}',
+        description: dayYaz.fullName,
       ),
       CultureEntry(
         label: 'Day Keywords',

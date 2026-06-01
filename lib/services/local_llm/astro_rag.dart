@@ -4,6 +4,7 @@
 /// Corpus: Ptolemy Tetrabiblos, Lilly Christian Astrology, BPHS (Vedic),
 ///         BaZi principles, Tzolk'in day signs, Egyptian decans,
 ///         Celtic tree lore.
+library astro_rag;
 
 class AstroRag {
   static final AstroRag instance = AstroRag._();

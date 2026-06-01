@@ -6,7 +6,8 @@
 ///   3. PERSONA    — birth chart identity + personality profile
 ///   4. PSYCHE     — session memory + RAG knowledge passages
 ///   5. ORACLE     — response style and format contract
-///
+library penta_prompt;
+
 /// This architecture ensures the model never hallucinates planetary
 /// positions — they are hard-coded into the prompt frame.
 
@@ -54,9 +55,10 @@ class PentaPrompt {
     for (final entry in pos.entries) {
       final p   = entry.value;
       final lon = p.eclipticLongitude.toStringAsFixed(2);
+      final deg = p.degreeInSign.toStringAsFixed(1);
       buf.writeln(
           '  ${_planetSym(entry.key)} ${entry.key.name.toUpperCase()}: '
-          '${p.signName} ${p.degreeInSign.toStringAsFixed(1)}°  (λ=${lon}°)');
+          '${p.signName} $deg°  (λ=$lon°)');
     }
 
     final sidereal = snap.siderealOffset;
@@ -88,14 +90,18 @@ class PentaPrompt {
     buf.writeln('=== TRADITION: ${culture.displayName.toUpperCase()} ===');
 
     if (cc != null) {
-      if (cc.sunSign != null)
+      if (cc.sunSign != null) {
         buf.writeln("  Sun sign: ${cc.sunSign}");
-      if (cc.moonSign != null)
+      }
+      if (cc.moonSign != null) {
         buf.writeln("  Moon sign: ${cc.moonSign}");
-      if (cc.ascendantSign != null)
+      }
+      if (cc.ascendantSign != null) {
         buf.writeln("  Rising/Ascendant: ${cc.ascendantSign}");
-      if (cc.entries.isNotEmpty && cc.entries.first.description != null && cc.entries.first.description!.isNotEmpty)
+      }
+      if (cc.entries.isNotEmpty && cc.entries.first.description != null && cc.entries.first.description!.isNotEmpty) {
         buf.writeln("  Core reading: ${cc.entries.first.description}");
+      }
 
       for (final insight in cc.keyInsights.take(3)) {
         buf.writeln("  • $insight");
@@ -188,13 +194,13 @@ class PentaPrompt {
   // ── Layer 5: ORACLE ────────────────────────────────────────────────────────
 
   static String _oracle() => '''=== ORACLE: RESPONSE CONTRACT ===
-You are AETHER, the stellar intelligence within Paulien\'s Sky.
+You are AETHER, the stellar intelligence within Paulien's Sky.
 You speak as a wise, poetic astrologer who has studied all six traditions.
 
 RULES:
 - Ground every statement in the COSMOS layer above. Never invent positions.
-- Reference the active TRADITION\'s vocabulary naturally.
-- Speak to the PERSONA\'s name and chart directly.
+- Reference the active TRADITION's vocabulary naturally.
+- Speak to the PERSONA's name and chart directly.
 - Be poetic but precise. Never vague. Metaphor must illuminate, not obscure.
 - Response length: 3–5 sentences for readings, conversational for chat.
 - Never say "as an AI" or "I cannot" — you ARE the stellar oracle.

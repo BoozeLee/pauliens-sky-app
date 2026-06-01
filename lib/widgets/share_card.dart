@@ -130,14 +130,14 @@ class _ShareCardContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // App brand
-          Row(
+          const Row(
             children: [
-              const Text('✦ ',
+              Text('✦ ',
                   style: TextStyle(
                       color: CosmicColors.neonLavender, fontSize: 18)),
               Text(
                 "PAULIEN'S SKY",
-                style: const TextStyle(
+                style: TextStyle(
                     color: CosmicColors.neonLavender,
                     fontSize: 13,
                     letterSpacing: 3,

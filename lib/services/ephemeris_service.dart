@@ -102,15 +102,15 @@ class EphemerisService {
   double _moonLongitude(double t) {
     final L = _norm360(218.3165 + 481267.8813 * t);
     final M = _norm360(357.5291 + 35999.0503 * t);
-    final Mp = _norm360(134.9634 + 477198.8676 * t);
+    final meanSun = _norm360(134.9634 + 477198.8676 * t);
     final D = _norm360(297.8502 + 445267.1115 * t);
     final F = _norm360(93.2721 + 483202.0175 * t);
 
     final lon = L +
-        6.2888 * math.sin(Mp * _deg) +
-        1.2740 * math.sin((2 * D - Mp) * _deg) +
+        6.2888 * math.sin(meanSun * _deg) +
+        1.2740 * math.sin((2 * D - meanSun) * _deg) +
         0.6583 * math.sin(2 * D * _deg) +
-        0.2136 * math.sin(2 * Mp * _deg) -
+        0.2136 * math.sin(2 * meanSun * _deg) -
         0.1851 * math.sin(M * _deg) -
         0.1143 * math.sin(2 * F * _deg);
     return lon;

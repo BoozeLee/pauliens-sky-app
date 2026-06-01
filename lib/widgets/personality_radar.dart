@@ -69,8 +69,11 @@ class _RadarPainter extends CustomPainter {
       final path = Path();
       for (int i = 0; i < 6; i++) {
         final p = _point(i, r * scale, center);
-        if (i == 0) path.moveTo(p.dx, p.dy);
-        else path.lineTo(p.dx, p.dy);
+        if (i == 0) {
+          path.moveTo(p.dx, p.dy);
+        } else {
+          path.lineTo(p.dx, p.dy);
+        }
       }
       path.close();
       canvas.drawPath(path, gridPaint);
@@ -85,11 +88,14 @@ class _RadarPainter extends CustomPainter {
   void _drawData(Canvas canvas, Offset center, double r) {
     final values = _values;
     final path = Path();
-    for (int i = 0; i < 6; i++) {
-      final p = _point(i, r * values[i], center);
-      if (i == 0) path.moveTo(p.dx, p.dy);
-      else path.lineTo(p.dx, p.dy);
-    }
+for (int i = 0; i < 6; i++) {
+        final p = _point(i, r * values[i], center);
+        if (i == 0) {
+          path.moveTo(p.dx, p.dy);
+        } else {
+          path.lineTo(p.dx, p.dy);
+        }
+      }
     path.close();
 
     canvas.drawPath(
