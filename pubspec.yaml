@@ -40,7 +40,7 @@ dependencies:
   dart_iztro: ^2.0.0
 
   # Timezone
-  timezone: ^0.9.4
+  timezone: ^0.11.0
 
 dev_dependencies:
   flutter_test:
