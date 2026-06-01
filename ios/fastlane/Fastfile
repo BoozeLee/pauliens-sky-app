@@ -1,0 +1,49 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Build a release IPA with automatic code signing"
+  lane :build do |options|
+    type = options[:export_method] || "app-store"
+
+    setup_ci if ENV["CI"]
+
+    capture_certificates if options[:use_match]
+
+    flutter(
+      build: "ipa",
+      config: "release",
+      export_method: type,
+    )
+  end
+
+  desc "Deploy to TestFlight"
+  lane :testflight do |options|
+    build(export_method: "app-store")
+
+    pilot(
+      skip_waiting_for_build_processing: options[:skip_waiting] || false,
+      changelog: options[:changelog] || "New build of Paulien's Sky",
+    )
+  end
+
+  desc "Deploy to App Store"
+  lane :appstore do |options|
+    build(export_method: "app-store")
+
+    upload_to_app_store(
+      skip_metadata: true,
+      skip_screenshots: true,
+      force: true,
+      submit_for_review: false,
+      automatic_release: false,
+    )
+  end
+
+  desc "Increment build number"
+  lane :bump do
+    increment_build_number(
+      build_number: Time.now.strftime("%Y%m%d%H%M"),
+      xcodeproj: "Runner.xcodeproj",
+    )
+  end
+end

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../services/ai_service.dart';
 import '../services/chart_engine.dart';
 import '../services/premium_service.dart';
 import '../theme/cosmic_theme.dart';
@@ -66,9 +65,9 @@ class _DailyReadingCardState extends State<DailyReadingCard> {
               const Text('✦ ',
                   style: TextStyle(
                       color: CosmicColors.neonPink, fontSize: 13)),
-              Text(
+              const Text(
                 'DAILY READING',
-                style: const TextStyle(
+                style: TextStyle(
                     color: CosmicColors.neonPink,
                     fontSize: 10,
                     letterSpacing: 2,

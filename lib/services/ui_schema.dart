@@ -269,5 +269,7 @@ class SchemaIcons {
     'person_outlined':          Icons.person_outline,
     'download':                 Icons.download,
     'download_outlined':        Icons.download_outlined,
+    'brush':                    Icons.brush,
+    'brush_outlined':           Icons.brush_outlined,
   };
 }

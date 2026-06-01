@@ -26,7 +26,7 @@ class WesternModule implements CultureModule {
         value: sunSign,
         description: WesternData.signDescriptions[sunSign],
       ),
-      CultureEntry(label: 'Sun Degree', value: '$sunDegree° ${sunSign}'),
+      CultureEntry(label: 'Sun Degree', value: '$sunDegree° $sunSign'),
       CultureEntry(
         label: 'Moon Sign',
         value: moonSign,

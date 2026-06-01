@@ -5,7 +5,6 @@ import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/culture_chart.dart';
 import '../services/chart_engine.dart';
-import '../services/fixed_stars.dart';
 import '../theme/cosmic_theme.dart';
 
 class ShareCardButton extends StatefulWidget {
@@ -131,14 +130,14 @@ class _ShareCardContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // App brand
-          Row(
+          const Row(
             children: [
-              const Text('✦ ',
+              Text('✦ ',
                   style: TextStyle(
                       color: CosmicColors.neonLavender, fontSize: 18)),
               Text(
                 "PAULIEN'S SKY",
-                style: const TextStyle(
+                style: TextStyle(
                     color: CosmicColors.neonLavender,
                     fontSize: 13,
                     letterSpacing: 3,

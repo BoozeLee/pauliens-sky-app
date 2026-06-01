@@ -2,6 +2,7 @@
 /// Fetches sub-arcsecond geocentric ecliptic longitudes for all planets.
 /// Applies IERS Delta-T (Espenak & Meeus) to convert UTC → TT (JDE).
 /// Results cached forever by JDE key (birth charts never change).
+library horizons_service;
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;

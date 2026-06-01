@@ -104,6 +104,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await premium.setAnthropicKey(_anthropicCtrl.text);
     await premium.setGeminiKey(_geminiCtrl.text);
     await premium.setOpenAiKey(_openAiCtrl.text);
+    if (!mounted) return;
 
     final lat = double.tryParse(_latCtrl.text) ?? 50.9311;
     final lon = double.tryParse(_lonCtrl.text) ?? 5.3378;
@@ -159,7 +160,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 padding: const EdgeInsets.all(20),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
-                    _SectionTitle('BIRTH PROFILE'),
+                    const _SectionTitle('BIRTH PROFILE'),
                     const SizedBox(height: 12),
                     _betaNotice(context),
                     const SizedBox(height: 12),
@@ -177,21 +178,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(height: 10),
                     Row(children: [
                       Expanded(child: _field(_latCtrl, 'Latitude', Icons.explore_outlined,
-                          keyboard: TextInputType.numberWithOptions(
+                          keyboard: const TextInputType.numberWithOptions(
                               decimal: true, signed: true))),
                       const SizedBox(width: 10),
                       Expanded(child: _field(_lonCtrl, 'Longitude', Icons.explore_outlined,
-                          keyboard: TextInputType.numberWithOptions(
+                          keyboard: const TextInputType.numberWithOptions(
                               decimal: true, signed: true))),
                     ]),
                     const SizedBox(height: 24),
 
-                    _SectionTitle('PROFILES'),
+                    const _SectionTitle('PROFILES'),
                     const SizedBox(height: 12),
                     _ProfileManager(appState: context.read<AppState>()),
                     const SizedBox(height: 24),
 
-                    _SectionTitle('AI API KEYS'),
+                    const _SectionTitle('AI API KEYS'),
                     const SizedBox(height: 8),
                     _apiKeyInfo(context),
                     const SizedBox(height: 12),
@@ -240,7 +241,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _keyStatusRow(premium),
                     const SizedBox(height: 24),
 
-                    _SectionTitle('SUBSCRIPTION'),
+                    const _SectionTitle('SUBSCRIPTION'),
                     const SizedBox(height: 12),
                     _subscriptionCard(context, premium),
                     const SizedBox(height: 16),
@@ -264,7 +265,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    _SectionTitle('LANGUAGE / TAAL'),
+                    const _SectionTitle('LANGUAGE / TAAL'),
                     const SizedBox(height: 12),
                     _LocaleToggle(),
                     const SizedBox(height: 32),

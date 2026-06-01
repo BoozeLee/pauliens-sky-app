@@ -5,6 +5,12 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy-ios:
+        description: 'Deploy iOS build to TestFlight'
+        type: boolean
+        default: false
 
 jobs:
   analyze-and-test:
@@ -15,7 +21,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.41.8'
+          flutter-version: '3.44.0'
           channel: stable
           cache: true
 
@@ -28,6 +34,28 @@ jobs:
       - name: Run tests
         run: flutter test
 
+  build-web:
+    needs: analyze-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+      - run: flutter build web --release
+
+      - name: Upload web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: build/web/
+
   build-android:
     needs: analyze-and-test
     runs-on: ubuntu-latest
@@ -37,7 +65,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.41.8'
+          flutter-version: '3.44.0'
           channel: stable
           cache: true
 
@@ -48,9 +76,9 @@ jobs:
           java-version: '17'
 
       - run: flutter pub get
-      - run: flutter build apk --release --split-per-abi
+      - run: flutter build apk --debug --split-per-abi
 
-      - name: Upload APK
+      - name: Upload APKs
         uses: actions/upload-artifact@v4
         with:
           name: android-apk
@@ -65,15 +93,79 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.41.8'
+          flutter-version: '3.44.0'
           channel: stable
           cache: true
 
+      - name: Install CocoaPods
+        run: |
+          gem install cocoapods --no-document
+          pod repo update
+
       - run: flutter pub get
-      - run: flutter build ios --release --no-codesign
+      - run: cd ios && pod install && cd ..
+
+      - name: Import signing certificate
+        if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
+        env:
+          CERT_BASE64: ${{ secrets.IOS_CERT_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.IOS_CERT_PASSWORD }}
+          PROFILE_BASE64: ${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+        run: |
+          CERT_PATH=$RUNNER_TEMP/build_cert.p12
+          PROFILE_PATH=$RUNNER_TEMP/build_profile.mobileprovision
+          KEYCHAIN_PATH=$RUNNER_TEMP/build.keychain
+
+          echo "$CERT_BASE64" | base64 --decode > "$CERT_PATH"
+          echo "$PROFILE_BASE64" | base64 --decode > "$PROFILE_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 3600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERT_PATH" -P "$CERT_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
+
+          UUID=$(grep -A1 'UUID' "$PROFILE_PATH" | grep -oE '[A-F0-9-]{36}' | head -1)
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          cp "$PROFILE_PATH" "$HOME/Library/MobileDevice/Provisioning Profiles/$UUID.mobileprovision"
+
+          rm -f "$CERT_PATH" "$PROFILE_PATH"
+
+      - name: Build IPA (unsigned)
+        if: github.event_name != 'workflow_dispatch' && !startsWith(github.ref, 'refs/tags/')
+        run: flutter build ipa --release --no-codesign
+
+      - name: Build IPA (signed)
+        if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
+        run: flutter build ipa --release --export-method app-store
 
       - name: Upload iOS build
         uses: actions/upload-artifact@v4
         with:
           name: ios-build
-          path: build/ios/iphoneos/Runner.app
+          path: build/ios/ipa/*.ipa
+
+  deploy-testflight:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.deploy-ios == 'true'
+    needs: build-ios
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download IPA
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-build
+
+      - name: Upload to TestFlight
+        env:
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+        run: |
+          mkdir -p ~/.fastlane
+          echo "$APP_STORE_CONNECT_API_KEY" > ~/.fastlane/app_store_connect_api_key.json
+          gem install fastlane --no-document
+          fastlane pilot upload \
+            --ipa "*.ipa" \
+            --api_key_path ~/.fastlane/app_store_connect_api_key.json \
+            --skip_waiting_for_build_processing true

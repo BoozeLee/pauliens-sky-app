@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/birth_context.dart';
 import '../models/culture_chart.dart';
 import '../services/chart_engine.dart';
 
@@ -18,7 +17,7 @@ class AiService {
   static const _geminiBase =
       'https://generativelanguage.googleapis.com/v1beta';
   static const _openAiBase    = 'https://api.openai.com/v1';
-  static const _anthropicModel = 'claude-opus-4-7';
+  static const _anthropicModel = "claude-sonnet-4-20250514";
   static const _geminiModel    = 'gemini-2.0-flash';
   static const _openAiModel    = 'gpt-4o-mini';
 
@@ -31,7 +30,9 @@ class AiService {
   bool get hasAnthropic => anthropicKey != null && anthropicKey!.isNotEmpty;
   bool get hasGemini    => geminiKey    != null && geminiKey!.isNotEmpty;
   bool get hasOpenAi    => openAiKey    != null && openAiKey!.isNotEmpty;
-  bool get hasAny       => hasAnthropic || hasGemini || hasOpenAi;
+  static const proxyUrl = String.fromEnvironment("PAULIENS_SKY_AI_PROXY_URL");
+  bool get hasProxy    => proxyUrl.isNotEmpty;
+  bool get hasAny       => proxyUrl.isNotEmpty || hasAnthropic || hasGemini || hasOpenAi;
 
   // ── System prompt shared by all astrology calls ──────────────────────────
 
@@ -76,7 +77,7 @@ Rules:
   // ── Public API ────────────────────────────────────────────────────────────
 
   Future<String> interpretChart(FullChart chart, {AiProvider? prefer}) async {
-    final prompt =
+    const prompt =
         'Give a rich, multi-cultural interpretation of this birth chart, '
         'weaving together the Western, Vedic, Chinese, and Mayan perspectives '
         'into a cohesive portrait. Highlight the most striking themes.';
@@ -120,27 +121,36 @@ Rules:
 
   // ── Internal routing ──────────────────────────────────────────────────────
 
-  Future<String> _call(
-    String prompt,
-    FullChart chart, {
-    AiProvider? prefer,
-    List<AiMessage>? history,
-  }) async {
-    final provider = _pickProvider(prefer);
-    if (provider == null) throw Exception('No AI API key configured');
-
-    final system = _systemPrompt(chart);
-    final messages = [
-      ...?history,
-      AiMessage(role: 'user', content: prompt),
-    ];
-
-    return switch (provider) {
-      AiProvider.anthropic => _callAnthropic(system, messages),
-      AiProvider.gemini    => _callGemini(system, messages),
-      AiProvider.openai    => _callOpenAi(system, messages),
-    };
+Future<String> _call(
+  String prompt,
+  FullChart chart, {
+  AiProvider? prefer,
+  List<AiMessage>? history,
+}) async {
+  final provider = _pickProvider(prefer);
+  if (provider == null) {
+    throw Exception(
+      'No AI API key configured. Please set one of: '
+      'ANTHROPIC_API_KEY, GEMINI_API_KEY, OPENAI_API_KEY environment variables, '
+      'or configure a proxy via PAULIENS_SKY_AI_PROXY_URL. '
+      'For offline use, ensure AETHER engine is available via AiOrchestrator.'
+    );
   }
+
+  final system = _systemPrompt(chart);
+  final messages = [
+    ...?history,
+    AiMessage(role: 'user', content: prompt),
+  ];
+
+  if (hasProxy) return _callProxy(provider, system, messages);
+
+  return switch (provider) {
+    AiProvider.anthropic => _callAnthropic(system, messages),
+    AiProvider.gemini    => _callGemini(system, messages),
+    AiProvider.openai    => _callOpenAi(system, messages),
+  };
+}
 
   Future<String> _callWithHistory(
     String userMessage,
@@ -150,6 +160,7 @@ Rules:
   }) => _call(userMessage, chart, prefer: prefer, history: history);
 
   AiProvider? _pickProvider(AiProvider? prefer) {
+    if (hasProxy) return prefer ?? AiProvider.anthropic;
     if (prefer == AiProvider.anthropic && hasAnthropic) return AiProvider.anthropic;
     if (prefer == AiProvider.gemini    && hasGemini)    return AiProvider.gemini;
     if (prefer == AiProvider.openai    && hasOpenAi)    return AiProvider.openai;
@@ -157,6 +168,28 @@ Rules:
     if (hasGemini)    return AiProvider.gemini;
     if (hasOpenAi)    return AiProvider.openai;
     return null;
+  }
+
+  // ── Proxy (neuromorphic-chat) ─────────────────────────────────────────────
+
+  Future<String> _callProxy(AiProvider provider, String system, List<AiMessage> messages) async {
+    final response = await http.post(
+      Uri.parse(proxyUrl),
+      headers: {'content-type': 'application/json'},
+      body: jsonEncode({
+        'provider': provider.name,
+        'system': system,
+        'messages': messages.map((m) => m.toJson()).toList(),
+        'maxTokens': 1024,
+        'temperature': 0.85,
+      }),
+    );
+    if (response.statusCode != 200) {
+      final err = jsonDecode(response.body);
+      throw Exception('Proxy error: ${err['error'] ?? response.statusCode}');
+    }
+    final data = jsonDecode(response.body);
+    return data['content'] as String;
   }
 
   // ── Anthropic Claude ──────────────────────────────────────────────────────

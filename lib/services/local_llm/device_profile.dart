@@ -65,12 +65,4 @@ class DeviceProfile {
     estimatedRamMb: 2300,
   );
 
-  static DeviceProfile _mobileLow() => const DeviceProfile(
-    deviceClass: DeviceClass.low,
-    nThreads: 2,
-    nCtx: 1024,
-    nBatch: 64,
-    recommendedModel: 'gemma-2-2b-it-Q4_K_M.gguf',
-    estimatedRamMb: 1600,
-  );
 }

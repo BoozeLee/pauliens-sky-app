@@ -1,5 +1,7 @@
 /// Raw dart:ffi bindings to libaether_llm.so
 /// Do not call these directly — use LlamaService instead.
+// ignore_for_file: library_private_types_in_public_api
+library llama_ffi;
 
 import 'dart:ffi';
 import 'dart:io';
@@ -11,25 +13,25 @@ typedef AetherContextPtr = Pointer<AetherContextOpaque>;
 
 // C function signatures
 typedef _AetherLoadC = AetherContextPtr Function(
-    Pointer<Utf8> path, Int32 nThreads, Int32 nCtx, Int32 nGpuLayers);
+    Pointer<Uint8> path, Int32 nThreads, Int32 nCtx, Int32 nGpuLayers);
 typedef _AetherLoadDart = AetherContextPtr Function(
-    Pointer<Utf8> path, int nThreads, int nCtx, int nGpuLayers);
+    Pointer<Uint8> path, int nThreads, int nCtx, int nGpuLayers);
 
 typedef _AetherFreeC    = Void Function(AetherContextPtr);
 typedef _AetherFreeDart = void Function(AetherContextPtr);
 
-typedef _AetherInferC = Pointer<Utf8> Function(
-    AetherContextPtr, Pointer<Utf8> prompt,
+typedef _AetherInferC = Pointer<Uint8> Function(
+    AetherContextPtr, Pointer<Uint8> prompt,
     Int32 maxTokens, Float temperature, Float topP, Int32 repeatPenaltyN);
-typedef _AetherInferDart = Pointer<Utf8> Function(
-    AetherContextPtr, Pointer<Utf8> prompt,
+typedef _AetherInferDart = Pointer<Uint8> Function(
+    AetherContextPtr, Pointer<Uint8> prompt,
     int maxTokens, double temperature, double topP, int repeatPenaltyN);
 
-typedef _AetherFreeStringC    = Void Function(Pointer<Utf8>);
-typedef _AetherFreeStringDart = void Function(Pointer<Utf8>);
+typedef _AetherFreeStringC    = Void Function(Pointer<Uint8>);
+typedef _AetherFreeStringDart = void Function(Pointer<Uint8>);
 
-typedef _AetherModelNameC    = Pointer<Utf8> Function(AetherContextPtr);
-typedef _AetherModelNameDart = Pointer<Utf8> Function(AetherContextPtr);
+typedef _AetherModelNameC    = Pointer<Uint8> Function(AetherContextPtr);
+typedef _AetherModelNameDart = Pointer<Uint8> Function(AetherContextPtr);
 
 typedef _AetherToksPerSecC    = Float Function(AetherContextPtr);
 typedef _AetherToksPerSecDart = double Function(AetherContextPtr);
@@ -97,21 +99,21 @@ class AetherLlamaLib {
   }
 }
 
-// ── Utf8 helpers (inline, no package needed) ────────────────────────────
+// ── Uint8 helpers (inline, no package needed) ────────────────────────────
 
 extension StringToNative on String {
-  Pointer<Utf8> toNativeUtf8() {
+  Pointer<Uint8> toNativeUint8() {
     final units = codeUnits;
     final ptr = calloc<Uint8>(units.length + 1);
     for (int i = 0; i < units.length; i++) {
       ptr[i] = units[i] & 0xFF;
     }
     ptr[units.length] = 0;
-    return ptr.cast<Utf8>();
+    return ptr.cast<Uint8>();
   }
 }
 
-extension NativeToString on Pointer<Utf8> {
+extension NativeToString on Pointer<Uint8> {
   String toDartString() {
     if (address == 0) return '';
     final bytes = <int>[];

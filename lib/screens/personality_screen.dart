@@ -28,7 +28,7 @@ class PersonalityScreen extends StatelessWidget {
                 backgroundColor: CosmicColors.background,
                 title: Text('${name}s Sky',
                     style: Theme.of(context).textTheme.displayMedium?.copyWith(fontSize: 20)),
-                leading: BackButton(color: CosmicColors.textSecondary),
+                leading: const BackButton(color: CosmicColors.textSecondary),
               ),
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -116,7 +116,7 @@ class _RadarSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _SectionTitle('Personality Constellation'),
+        const _SectionTitle('Personality Constellation'),
         const SizedBox(height: 16),
         Center(child: PersonalityRadar(profile: profile, size: 280)),
         const SizedBox(height: 12),
@@ -139,7 +139,7 @@ class _CoreTraitsCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionTitle('Core Traits'),
+        const _SectionTitle('Core Traits'),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
@@ -185,7 +185,7 @@ class _CrossCultureSummary extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionTitle('Sky Through Many Eyes'),
+        const _SectionTitle('Sky Through Many Eyes'),
         const SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(
@@ -274,7 +274,7 @@ class _FixedStarsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionTitle('Fixed Stars at Birth'),
+        const _SectionTitle('Fixed Stars at Birth'),
         const SizedBox(height: 4),
         Text(
           'Ancient stars that touched your planets when you were born',

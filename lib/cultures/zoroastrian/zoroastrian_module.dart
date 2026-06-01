@@ -29,7 +29,7 @@ class ZoroastrianModule implements CultureModule {
       CultureEntry(
         label: 'Day Yazata',
         value: '${dayYaz.name} (day $dayNum)',
-        description: '${dayYaz.fullName}',
+        description: dayYaz.fullName,
       ),
       CultureEntry(
         label: 'Day Keywords',
@@ -72,7 +72,7 @@ class ZoroastrianModule implements CultureModule {
     final monthDesc = ZoroastrianData.monthDescriptions[month.name] ?? '';
 
     final insights = [
-      '${month.symbol} ${month.name} — ${monthDesc}',
+      '${month.symbol} ${month.name} — $monthDesc',
       '${star.name}: ${star.mythology}',
       '${spenta.name} (${spenta.meaning}): your guiding immortal bestows ${spenta.gifts}.',
       'Day of ${dayYaz.name}: your birth day yazata carries ${dayYaz.keywords}.',
@@ -97,17 +97,15 @@ class ZoroastrianModule implements CultureModule {
       (3, 20), (4, 20), (5, 21), (6, 21), (7, 23), (8, 23),
       (9, 23), (10, 23), (11, 22), (12, 22), (1, 20), (2, 19),
     ];
-    for (int i = starts.length - 1; i >= 0; i--) {
-      final (sm, sd) = starts[i];
-      final startDate = DateTime.utc(
-        (sm <= 2) ? dt.year : dt.year, sm, sd);
-      // Handle year wrap: Bahman (Jan) and Esfand (Feb) need same year as input
-      // Dey (Dec) starts in same year as input date if Dec; else prior year
-      final candidate = sm >= 3
-          ? DateTime.utc(dt.year, sm, sd)
-          : DateTime.utc(dt.month <= 2 ? dt.year : dt.year + 1, sm, sd);
-      if (!dt.isBefore(candidate)) return i;
-    }
+     for (int i = starts.length - 1; i >= 0; i--) {
+       final (sm, sd) = starts[i];
+       // Handle year wrap: Bahman (Jan) and Esfand (Feb) need same year as input
+       // Dey (Dec) starts in same year as input date if Dec; else prior year
+       final candidate = sm >= 3
+           ? DateTime.utc(dt.year, sm, sd)
+           : DateTime.utc(dt.month <= 2 ? dt.year : dt.year + 1, sm, sd);
+       if (!dt.isBefore(candidate)) return i;
+     }
     return 11; // Esfand fallback
   }
 
