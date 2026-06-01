@@ -51,7 +51,7 @@ jobs:
       - run: flutter build web --release
 
       - name: Upload web build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: web-build
           path: build/web/
@@ -79,7 +79,7 @@ jobs:
       - run: flutter build apk --debug --split-per-abi
 
       - name: Upload APKs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: android-apk
           path: build/app/outputs/flutter-apk/*.apk
@@ -116,7 +116,7 @@ jobs:
           rm -rf Payload
 
       - name: Upload iOS build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ios-build
           path: pauliens-sky-unsigned.ipa
