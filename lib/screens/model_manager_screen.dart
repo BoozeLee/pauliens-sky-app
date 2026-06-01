@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 import '../services/ai_orchestrator.dart';
 import '../services/local_llm/device_profile.dart';
 import '../services/local_llm/llama_service.dart';
@@ -207,7 +206,7 @@ class _ModelManagerScreenState extends State<ModelManagerScreen> {
               SliverAppBar(
                 pinned: true,
                 backgroundColor: CosmicColors.background,
-                leading: BackButton(color: CosmicColors.textSecondary),
+                 leading: const BackButton(color: CosmicColors.textSecondary),
                 title: Text('AETHER Local AI',
                     style: Theme.of(context)
                         .textTheme
@@ -220,9 +219,9 @@ class _ModelManagerScreenState extends State<ModelManagerScreen> {
                   delegate: SliverChildListDelegate([
                     _DeviceCard(profile: profile),
                     const SizedBox(height: 16),
-                    _StatusCard(),
-                    const SizedBox(height: 20),
-                    _SectionHeader('AVAILABLE MODELS'),
+                     _StatusCard(),
+                     const SizedBox(height: 20),
+                    const _SectionHeader('AVAILABLE MODELS'),
                     const SizedBox(height: 12),
                     for (final spec in _models) ...[
                       _ModelCard(
