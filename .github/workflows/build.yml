@@ -120,10 +120,6 @@ jobs:
         with:
           name: ios-build
           path: pauliens-sky-unsigned.ipa
-        uses: actions/upload-artifact@v4
-        with:
-          name: ios-build
-          path: build/ios/ipa/*.ipa
 
   deploy-testflight:
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.deploy-ios == 'true'
