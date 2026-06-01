@@ -72,7 +72,7 @@ class _ChartScreenState extends State<ChartScreen>
                 pinned: true,
                 backgroundColor: CosmicColors.background,
                 expandedHeight: 320,
-                leading: BackButton(color: CosmicColors.textSecondary),
+                leading: const BackButton(color: CosmicColors.textSecondary),
                 actions: [
                   IconButton(
                     icon: const Icon(Icons.person_search_outlined,

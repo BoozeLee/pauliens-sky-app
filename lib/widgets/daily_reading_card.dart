@@ -65,9 +65,9 @@ class _DailyReadingCardState extends State<DailyReadingCard> {
               const Text('✦ ',
                   style: TextStyle(
                       color: CosmicColors.neonPink, fontSize: 13)),
-              Text(
+              const Text(
                 'DAILY READING',
-                style: const TextStyle(
+                style: TextStyle(
                     color: CosmicColors.neonPink,
                     fontSize: 10,
                     letterSpacing: 2,

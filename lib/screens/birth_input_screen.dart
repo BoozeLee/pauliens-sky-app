@@ -162,13 +162,13 @@ class _BirthInputScreenState extends State<BirthInputScreen> {
                 backgroundColor: CosmicColors.background,
                 title: Text('Read the Sky',
                     style: Theme.of(context).textTheme.displayMedium?.copyWith(fontSize: 20)),
-                leading: BackButton(color: CosmicColors.textSecondary),
+                leading: const BackButton(color: CosmicColors.textSecondary),
               ),
               SliverPadding(
                 padding: const EdgeInsets.all(20),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
-                    _SectionLabel('Who are we reading?'),
+                    const _SectionLabel('Who are we reading?'),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _nameCtrl,
@@ -180,7 +180,7 @@ class _BirthInputScreenState extends State<BirthInputScreen> {
                       style: const TextStyle(color: CosmicColors.textPrimary),
                     ),
                     const SizedBox(height: 24),
-                    _SectionLabel('Birth Date & Time'),
+                    const _SectionLabel('Birth Date & Time'),
                     const SizedBox(height: 12),
                     Row(
                       children: [
@@ -206,7 +206,7 @@ class _BirthInputScreenState extends State<BirthInputScreen> {
                       ],
                     ),
                     const SizedBox(height: 24),
-                    _SectionLabel('Birth Location'),
+                    const _SectionLabel('Birth Location'),
                     const SizedBox(height: 12),
                     TextField(
                       controller: _cityCtrl,

@@ -21,9 +21,9 @@ class FixedStarsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
-              const Text('★ ',
+              Text('★ ',
                   style: TextStyle(
                       color: CosmicColors.neonYellow, fontSize: 14)),
               Text(
@@ -40,7 +40,7 @@ class FixedStarsCard extends StatelessWidget {
           for (final (star, orb) in stars) ...[
             _StarRow(star: star, orb: orb),
             if (star != stars.last.$1)
-              Divider(
+              const Divider(
                   color: CosmicColors.divider,
                   height: 16,
                   thickness: 0.5),

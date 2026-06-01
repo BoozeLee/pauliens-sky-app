@@ -79,7 +79,7 @@ class _CosmicNavBar extends StatelessWidget {
       ..sort((a, b) => a.index.compareTo(b.index));
 
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: CosmicColors.surface,
         border: Border(
           top: BorderSide(color: CosmicColors.divider, width: 0.5),

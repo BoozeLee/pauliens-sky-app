@@ -235,7 +235,7 @@ class AetherEngine {
       final sign = AetherKnowledge.signs[western.sunSign];
       if (sign != null) {
         buf.writeln('Your Sun in ${sign.name} (${sign.element}, ${sign.modality})');
-        buf.writeln('${sign.mythology}');
+        buf.writeln('$sign.mythology');
         buf.writeln();
         buf.writeln('Strengths: $sign.strengths');
         buf.writeln('Growth edges: ${sign.challenges}');

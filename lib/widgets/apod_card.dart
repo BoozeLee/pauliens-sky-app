@@ -29,7 +29,7 @@ class _ApodCardState extends State<ApodCard> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return _Shell(child: const SizedBox(
+      return const _Shell(child: SizedBox(
         height: 180,
         child: Center(child: CircularProgressIndicator(
           strokeWidth: 1.5, color: CosmicColors.neonCyan)),

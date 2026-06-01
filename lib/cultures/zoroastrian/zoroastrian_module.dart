@@ -72,7 +72,7 @@ class ZoroastrianModule implements CultureModule {
     final monthDesc = ZoroastrianData.monthDescriptions[month.name] ?? '';
 
     final insights = [
-      '${month.symbol} ${month.name} — ${monthDesc}',
+      '${month.symbol} ${month.name} — $monthDesc',
       '${star.name}: ${star.mythology}',
       '${spenta.name} (${spenta.meaning}): your guiding immortal bestows ${spenta.gifts}.',
       'Day of ${dayYaz.name}: your birth day yazata carries ${dayYaz.keywords}.',

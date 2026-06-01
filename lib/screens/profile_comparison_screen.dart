@@ -50,9 +50,9 @@ class _ProfileComparisonScreenState extends State<ProfileComparisonScreen> {
         child: SafeArea(
           child: CustomScrollView(
             slivers: [
-              SliverAppBar(
+              const SliverAppBar(
                 backgroundColor: Colors.transparent,
-                title: const Text('Profile Comparison'),
+                title: Text('Profile Comparison'),
                 floating: true,
               ),
               SliverPadding(
@@ -111,9 +111,9 @@ class _ProfilePickers extends StatelessWidget {
       children: [
         Expanded(child: _Picker(profiles: profiles, value: idA, onChanged: onA,
             color: CosmicColors.neonLavender)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: const Icon(Icons.compare_arrows,
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          child: Icon(Icons.compare_arrows,
               color: CosmicColors.neonPink, size: 20),
         ),
         Expanded(child: _Picker(profiles: profiles, value: idB, onChanged: onB,
@@ -230,10 +230,10 @@ class _SharedTraitsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _CardTitle('✦ Personality Resonance'),
+          const _CardTitle('✦ Personality Resonance'),
           const SizedBox(height: 12),
           if (shared.isNotEmpty) ...[
-            _SubLabel('SHARED'),
+            const _SubLabel('SHARED'),
             const SizedBox(height: 6),
             Wrap(
               spacing: 6, runSpacing: 6,
@@ -320,14 +320,14 @@ class _RadarCompare extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _CardTitle('◎ Trait Comparison'),
+          const _CardTitle('◎ Trait Comparison'),
           const SizedBox(height: 8),
           Row(children: [
-            _Dot(CosmicColors.neonLavender), const SizedBox(width: 4),
+            const _Dot(CosmicColors.neonLavender), const SizedBox(width: 4),
             Text(nameA, style: const TextStyle(
                 color: CosmicColors.neonLavender, fontSize: 11)),
             const SizedBox(width: 12),
-            _Dot(CosmicColors.neonCyan), const SizedBox(width: 4),
+            const _Dot(CosmicColors.neonCyan), const SizedBox(width: 4),
             Text(nameB, style: const TextStyle(
                 color: CosmicColors.neonCyan, fontSize: 11)),
           ]),
@@ -432,7 +432,7 @@ class _TraditionsCompare extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _CardTitle('◈ Signs by Tradition'),
+          const _CardTitle('◈ Signs by Tradition'),
           const SizedBox(height: 8),
           Row(children: [
             const SizedBox(width: 80),
@@ -539,7 +539,7 @@ class _SynastrySection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _CardTitle('♃ Synastry — Celestial Compatibility'),
+          const _CardTitle('♃ Synastry — Celestial Compatibility'),
           const SizedBox(height: 14),
           // Score bar
           Row(children: [
@@ -576,14 +576,14 @@ class _SynastrySection extends StatelessWidget {
           ]),
           if (harmonic.isNotEmpty) ...[
             const SizedBox(height: 16),
-            _SubLabel('HARMONIOUS ASPECTS'),
+            const _SubLabel('HARMONIOUS ASPECTS'),
             const SizedBox(height: 8),
             ...harmonic.map((a) => _AspectRow(a, colorA, colorB,
                 color: CosmicColors.neonGreen)),
           ],
           if (tense.isNotEmpty) ...[
             const SizedBox(height: 12),
-            _SubLabel('DYNAMIC TENSIONS'),
+            const _SubLabel('DYNAMIC TENSIONS'),
             const SizedBox(height: 8),
             ...tense.map((a) => _AspectRow(a, colorA, colorB,
                 color: CosmicColors.neonPink)),

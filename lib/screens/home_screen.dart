@@ -48,15 +48,15 @@ class HomeScreen extends StatelessWidget {
                         _CompareButton(appState: appState),
                       const SizedBox(height: 24),
                     ],
-                    _SectionLabel('READ A NEW SKY'),
+                    const _SectionLabel('READ A NEW SKY'),
                     const SizedBox(height: 12),
                     const _NewReadingButton(),
                     const SizedBox(height: 24),
-                    _SectionLabel('TODAY IN THE COSMOS'),
+                    const _SectionLabel('TODAY IN THE COSMOS'),
                     const SizedBox(height: 12),
                     const ApodCard(),
                     const SizedBox(height: 24),
-                    _SectionLabel('TRADITIONS'),
+                    const _SectionLabel('TRADITIONS'),
                     const SizedBox(height: 12),
                     _TraditionsGrid(chart: chart),
                     const SizedBox(height: 32),
@@ -206,8 +206,8 @@ class _ProfileCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text('✦ ',
-                    style: const TextStyle(
+                const Text('✦ ',
+                    style: TextStyle(
                         color: CosmicColors.neonLavender, fontSize: 16)),
                 Expanded(
                   child: Text(
@@ -258,7 +258,7 @@ class _ProfileCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              chart.personality.summary.split('.').first + '.',
+              '${chart.personality.summary.split('.').first}.',
               style: Theme.of(context)
                   .textTheme
                   .bodyMedium
@@ -303,8 +303,8 @@ class _CompareButton extends StatelessWidget {
             const Icon(Icons.compare_arrows,
                 color: CosmicColors.neonPink, size: 16),
             const SizedBox(width: 8),
-            Text('Compare Profiles',
-                style: const TextStyle(
+            const Text('Compare Profiles',
+                style: TextStyle(
                     color: CosmicColors.neonPink, fontSize: 13)),
             const SizedBox(width: 4),
             Text('(${appState.profiles.length})',

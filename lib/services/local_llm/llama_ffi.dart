@@ -1,5 +1,6 @@
 /// Raw dart:ffi bindings to libaether_llm.so
 /// Do not call these directly — use LlamaService instead.
+// ignore_for_file: library_private_types_in_public_api
 library llama_ffi;
 
 import 'dart:ffi';

@@ -39,7 +39,7 @@ class UpgradeScreen extends StatelessWidget {
               SliverAppBar(
                 pinned: true,
                 backgroundColor: CosmicColors.background,
-                leading: BackButton(color: CosmicColors.textSecondary),
+                leading: const BackButton(color: CosmicColors.textSecondary),
                 title: Text("Paulien's Sky V2",
                     style: Theme.of(context)
                         .textTheme
@@ -89,7 +89,7 @@ class UpgradeScreen extends StatelessWidget {
                     const SizedBox(height: 24),
 
                     // ── What's new ───────────────────────────────────────
-                    _SectionLabel("WHAT'S IN V2"),
+                    const _SectionLabel("WHAT'S IN V2"),
                     const SizedBox(height: 12),
                     ..._v2Features.map((f) => _FeatureRow(
                         emoji: f.$1, title: f.$2, desc: f.$3)),
@@ -148,7 +148,7 @@ class UpgradeScreen extends StatelessWidget {
                     const SizedBox(height: 24),
 
                     // ── Roadmap ──────────────────────────────────────────
-                    _SectionLabel('COMING NEXT'),
+                    const _SectionLabel('COMING NEXT'),
                     const SizedBox(height: 12),
                     ..._roadmap.map((f) => _FeatureRow(
                         emoji: f.$1, title: f.$2, desc: f.$3,

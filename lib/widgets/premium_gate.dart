@@ -41,7 +41,7 @@ class PremiumGate extends StatelessWidget {
                 children: [
                   const Icon(Icons.lock_outline,
                       color: CosmicColors.neonLavender, size: 28),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     customLabel ?? 'Premium Feature',
                     style: const TextStyle(
@@ -49,7 +49,7 @@ class PremiumGate extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         fontSize: 13),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   const Text(
                     'Tap to unlock',
                     style: TextStyle(

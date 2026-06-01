@@ -65,7 +65,7 @@ class _ArtStudioScreenState extends State<ArtStudioScreen> {
     showModalBottomSheet(context: context, builder: (_) => Padding(
       padding: const EdgeInsets.all(24),
       child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Icon(Icons.psychology, size: 48, color: CosmicColors.neonPink),
+        const Icon(Icons.psychology, size: 48, color: CosmicColors.neonPink),
         const SizedBox(height: 16),
         Text('AI art not available', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
@@ -108,7 +108,7 @@ class _ArtStudioScreenState extends State<ArtStudioScreen> {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       child: Row(children: [
-        Icon(Icons.brush, color: CosmicColors.neonCyan, size: 20),
+        const Icon(Icons.brush, color: CosmicColors.neonCyan, size: 20),
         const SizedBox(width: 8),
         Text('Art Studio', style: Theme.of(context).textTheme.titleMedium?.copyWith(color: CosmicColors.textPrimary, fontWeight: FontWeight.w600)),
       ]),
@@ -117,9 +117,9 @@ class _ArtStudioScreenState extends State<ArtStudioScreen> {
 
   Widget _buildBody() {
     if (_generating) {
-      return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+      return const Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
         CircularProgressIndicator(color: CosmicColors.neonLavender),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
         Text('Creating your cosmic art…', style: TextStyle(color: CosmicColors.textSecondary)),
       ]));
     }
@@ -127,9 +127,9 @@ class _ArtStudioScreenState extends State<ArtStudioScreen> {
       return Center(child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Icon(Icons.error_outline, size: 48, color: CosmicColors.neonOrange),
+          const Icon(Icons.error_outline, size: 48, color: CosmicColors.neonOrange),
           const SizedBox(height: 12),
-          Text(_error!, textAlign: TextAlign.center, style: TextStyle(color: CosmicColors.neonOrange)),
+          Text(_error!, textAlign: TextAlign.center, style: const TextStyle(color: CosmicColors.neonOrange)),
           const SizedBox(height: 16),
           OutlinedButton(onPressed: _generate, child: const Text('Try Again')),
         ]),
@@ -164,7 +164,7 @@ class _ArtStudioScreenState extends State<ArtStudioScreen> {
         const SizedBox(height: 16),
         Text('Describe your cosmic vision', style: Theme.of(context).textTheme.titleSmall?.copyWith(color: CosmicColors.textSecondary)),
         const SizedBox(height: 8),
-        Text('Enter a prompt below\nto generate astrological art.', textAlign: TextAlign.center, style: TextStyle(color: CosmicColors.textMuted, fontSize: 13)),
+        const Text('Enter a prompt below\nto generate astrological art.', textAlign: TextAlign.center, style: TextStyle(color: CosmicColors.textMuted, fontSize: 13)),
       ]),
     ));
   }
@@ -174,7 +174,7 @@ class _ArtStudioScreenState extends State<ArtStudioScreen> {
       padding: EdgeInsets.only(left: 16, right: 16, top: 12, bottom: MediaQuery.of(context).padding.bottom + 8),
       decoration: BoxDecoration(
         color: CosmicColors.surface.withAlpha(230),
-        border: Border(top: BorderSide(color: CosmicColors.divider, width: 0.5)),
+        border: const Border(top: BorderSide(color: CosmicColors.divider, width: 0.5)),
       ),
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         SizedBox(
@@ -203,14 +203,14 @@ class _ArtStudioScreenState extends State<ArtStudioScreen> {
           Expanded(
             child: TextField(
               controller: _promptCtrl,
-              style: TextStyle(color: CosmicColors.textPrimary, fontSize: 14),
-              decoration: InputDecoration(
+              style: const TextStyle(color: CosmicColors.textPrimary, fontSize: 14),
+              decoration: const InputDecoration(
                 hintText: 'e.g. "a cosmic phoenix"',
                 hintStyle: TextStyle(color: CosmicColors.textMuted, fontSize: 13),
                 filled: true,
                 fillColor: CosmicColors.card,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12)), borderSide: BorderSide.none),
+                contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               ),
             ),
           ),

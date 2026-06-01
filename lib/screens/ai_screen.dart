@@ -419,7 +419,7 @@ class _ChatTab extends StatelessWidget {
     return Column(children: [
       Expanded(
         child: messages.isEmpty
-            ? _EmptyState(
+            ? const _EmptyState(
                 icon: '💬',
                 label: 'Astrology Chat',
                 description: 'Ask anything about your chart — '
@@ -588,9 +588,9 @@ class _ChatInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: CosmicColors.surface,
-        border: const Border(
+        border: Border(
             top: BorderSide(color: CosmicColors.divider)),
       ),
       child: Row(children: [
@@ -649,7 +649,7 @@ class _AiStatusRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _StatusDot(
+        const _StatusDot(
           label: 'AETHER',
           tooltip: 'Built-in offline engine — no API key needed',
           active: true,
