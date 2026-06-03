@@ -1,55 +1,78 @@
-# pauliens_sky
+# Pauliens Sky
 
-A new Flutter project.
+One sky, many traditions. Pauliens Sky is a Flutter astrology app that compares cultural sky systems through a polished mobile/web interface, offline-first interpretation logic, and optional AI-assisted readings.
 
-This project is a starting point for a Flutter application.
+## What It Demonstrates
 
-## Getting Started
+- Cross-platform Flutter delivery for web, iOS, Android, Linux, macOS, and Windows.
+- Domain modeling across Western, Vedic, Chinese, Mayan, Egyptian, Celtic, and Zoroastrian traditions.
+- Provider-based state management with chart, profile, synastry, art, and settings flows.
+- Offline fallback behavior for core readings, with optional hosted AI proxy integration.
+- Professional product UI with share cards, personality views, fixed-star context, daily readings, and premium gates.
 
-This project is a starting point for a Flutter application.
+## Stack
 
-A few resources to get you started if this is your first Flutter project:
+- **App:** Flutter, Dart 3, Material UI
+- **State:** `provider`
+- **Data and services:** local cultural modules, ephemeris/Horizons services, APOD integration
+- **Storage:** `shared_preferences`, `flutter_secure_storage`
+- **AI path:** optional Vercel/NVIDIA proxy plus local AETHER fallback
+- **Quality gates:** `flutter analyze`, `flutter test`, `flutter build web`
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Project Structure
 
-For help getting started with Flutter development, view the
-online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```text
+lib/
+├── app.dart                         # App shell and navigation
+├── cultures/                        # Cultural astrology modules and datasets
+├── models/                          # Birth context, chart, profile, synastry models
+├── screens/                         # Product screens
+├── services/                        # Chart, AI, ephemeris, locale, art, APOD services
+├── state/                           # App state
+├── theme/                           # Cosmic visual system
+└── widgets/                         # Reusable UI components
 
-## Environment Variables for Deployment
+web/                                 # Flutter web shell and icons
+test/                                # Widget tests
+```
 
-To deploy this application fully, the following environment variables must be set:
+## Local Development
 
-### For Vercel Deployment (API Proxy Functions):
-- `NVIDIA_API_KEY` - Key for accessing NVIDIA NIM (LLM chat) and NVCF (image generation)
-- `PAULIENS_SKY_AI_PROXY_URL` - Set this in the Flutter app to point to your deployed Vercel AI proxy (e.g., https://your-app.vercel.app/api/ai/neuromorphic-chat)
-- `PAULIENS_SKY_APP_URL` - Base URL of your deployed Flutter web app (used by art generation service to construct absolute URLs)
+```bash
+flutter pub get
+flutter run -d chrome
+```
 
-### For Local Development:
-These can be set in `.env.client.local` (not committed to git) or via system environment:
-- `PAULIENS_SKY_APP_URL` - During development, can be left empty or set to local test URL
-- `PAULIENS_SKY_AI_PROXY_URL` - During development, points to local proxy or deployed service
+For production web validation:
 
-### AI Service Configuration:
-The application will attempt to use AI services in this order:
-1. Proxy service (if `PAULIENS_SKY_AI_PROXY_URL` is configured)
-2. Direct Anthropic API (if `ANTHROPIC_API_KEY` is set)
-3. Direct Gemini API (if `GEMINI_API_KEY` is set)
-4. Direct OpenAI API (if `OPENAI_API_KEY` is set)
-5. Fallback to AETHER offline engine (always available for core astrology features)
+```bash
+flutter analyze
+flutter test
+flutter build web --release
+```
 
-# Trigger CI
-# Trigger CI again
-# Fix CI
-# Fix Planet import
-# CI Trigger
-# Trigger CI build after fixes
-# Trigger CI
-# Trigger CI again
-# Fix CI
-# Fix Planet import
-# CI Trigger
-# Trigger CI build after fixes
-# Trigger CI
+## Optional Environment
+
+The core app works without hosted AI. To enable the deployed AI proxy path, configure:
+
+| Variable | Purpose |
+| --- | --- |
+| `NVIDIA_API_KEY` | Server-side key for NVIDIA NIM/NVCF proxy functions |
+| `PAULIENS_SKY_AI_PROXY_URL` | App-facing AI proxy URL |
+| `PAULIENS_SKY_APP_URL` | Public app base URL used by generated assets |
+
+Local-only client config can live in `.env.client.local`; do not commit API keys.
+
+## Deployment
+
+The public web build is deployed at:
+
+```text
+https://pauliens-sky-app.vercel.app
+```
+
+Before publishing a release, run the validation commands above and confirm the web build loads the main navigation, chart flow, and AI fallback path.
+
+## Status
+
+Portfolio project. The repository is public to show Flutter architecture, cross-cultural domain modeling, and product polish. Secrets, production credentials, and private deployment configuration are intentionally excluded.
