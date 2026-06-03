@@ -26,7 +26,7 @@ dependencies:
 
   # Local storage
   shared_preferences: ^2.2.3
-  flutter_secure_storage: ^9.0.0
+  flutter_secure_storage: ^10.3.1
 
   # UI
   google_fonts: ^6.2.1
