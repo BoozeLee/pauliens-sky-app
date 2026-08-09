@@ -34,7 +34,7 @@ dependencies:
   cached_network_image: ^3.3.1
 
   # Charts / custom painting helpers
-  fl_chart: ^0.68.0
+  fl_chart: ^1.2.0
 
   # Chinese astrology (BaZi, Zi Wei Dou Shu, Chinese zodiac)
   dart_iztro: ^2.0.0
